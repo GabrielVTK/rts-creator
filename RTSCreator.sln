@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2017
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTSCreator", "RTSCreator.csproj", "{72FC435E-8DA3-BB08-85B6-D0B8B30A69AB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTSCreator.Editor", "RTSCreator.Editor.csproj", "{7751A140-FE8C-1B71-17DD-709606BA41CA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{72FC435E-8DA3-BB08-85B6-D0B8B30A69AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72FC435E-8DA3-BB08-85B6-D0B8B30A69AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72FC435E-8DA3-BB08-85B6-D0B8B30A69AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72FC435E-8DA3-BB08-85B6-D0B8B30A69AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7751A140-FE8C-1B71-17DD-709606BA41CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7751A140-FE8C-1B71-17DD-709606BA41CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7751A140-FE8C-1B71-17DD-709606BA41CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7751A140-FE8C-1B71-17DD-709606BA41CA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,33 @@
+﻿<Properties StartupItem="Assembly-CSharp.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\GameController.cs">
+    <Files>
+      <File FileName="Assets\Scripts\GameController.cs" Line="209" Column="38" />
+      <File FileName="Assets\Scripts\GameComponents.cs" Line="292" Column="51" />
+      <File FileName="Assets\Scripts\PlayerActions.cs" Line="36" Column="2" />
+      <File FileName="Assets\Scripts\Script.cs" Line="119" Column="22" />
+      <File FileName="Assets\Scripts\Map.cs" Line="76" Column="1" />
+      <File FileName="Assets\Scripts\Player.cs" Line="182" Column="19" />
+      <File FileName="Assets\Scripts\Pathfinding.cs" Line="36" Column="32" />
+      <File FileName="Assets\Scripts\Unit.cs" Line="62" Column="48" />
+      <File FileName="Assets\Scripts\CameraScript.cs" Line="106" Column="75" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="RTS Creator" expanded="True">
+            <Node name="Assembly-CSharp" expanded="True">
+              <Node name="Scripts" expanded="True">
+                <Node name="CombatType.cs" selected="True" />
+              </Node>
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>

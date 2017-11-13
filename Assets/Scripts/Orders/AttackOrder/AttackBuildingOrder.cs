@@ -76,7 +76,24 @@ public class AttackBuildingOrder : AttackOrder {
 
         return false;
     }
-    
+
+    public override bool Cooldown() {
+
+        if (this.units.Count == 0) {
+            this.isActive = false;
+            return true;
+        }
+
+        if (this.timeCounter >= GameController.newUnitTime) {
+            this.timeCounter -= GameController.newUnitTime;
+            return false;
+        }
+
+        this.timeCounter += GameController.newUnitTime * this.units[0].attackSpeed * GameController.staticGameSpeed;
+
+        return true;
+    }
+
     public override void Execute() {
 
         if(this.units.Count == 0) {
@@ -98,24 +115,18 @@ public class AttackBuildingOrder : AttackOrder {
                 }
                 this.movementOrder = null;
             }
+            
+            target.isAttacked = true;
 
-            if(this.timeCounter < GameController.unitTime) {
-                this.timeCounter += Time.deltaTime * this.units[0].attackSpeed;
-            } else {
-                
-                target.isAttacked = true;
-
-                foreach(Unit unit in this.units) {
-                    if(!unit.Attack(target)) {
-                        GameController.players[this.target.idPlayer].enemyAttackOrders.Remove(this);
-                        GameController.players[this.target.idPlayer].propertiesDestroied.Add(target);
-                        this.isActive = false;
-                        break;
-                    }
+            foreach(Unit unit in this.units) {
+                if(!unit.Attack(target)) {
+                    GameController.players[this.target.idPlayer].enemyAttackOrders.Remove(this);
+                    GameController.players[this.target.idPlayer].propertiesDestroied.Add(target);
+                    this.isActive = false;
+                    break;
                 }
-                
-                this.timeCounter -= GameController.unitTime;
             }
+                
 
         } else {
 
@@ -123,7 +134,10 @@ public class AttackBuildingOrder : AttackOrder {
                 this.movementOrder = new MovementOrder(this.idPlayer, this.units, this.destiny, true, false);
             }
 
-            this.movementOrder.Execute();
+            if(!movementOrder.Cooldown()) {
+                this.movementOrder.Execute();
+            }
+            
         }
 
     }

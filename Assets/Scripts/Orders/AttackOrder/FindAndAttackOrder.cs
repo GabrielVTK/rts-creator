@@ -59,9 +59,18 @@ public class FindAndAttackOrder : Order {
 
             }
         }
-
-
+        
         return property;
+    }
+
+    public override bool Cooldown() {
+
+        if (this.units.Count == 0) {
+            this.isActive = false;
+            return true;
+        }
+
+        return false;
     }
 
     public override void Execute() {
@@ -87,6 +96,9 @@ public class FindAndAttackOrder : Order {
                     } else {
                         this.AO = new AttackBuildingOrder(this.units, (Building)property);
                     }
+                } else {
+                    this.isActive = false;
+                    return;
                 }
 
             } else {
@@ -95,7 +107,9 @@ public class FindAndAttackOrder : Order {
             }
         }
         
-        AO.Execute();
+        if(this.AO.Cooldown()) {
+            this.AO.Execute();
+        }
     }
 
     public Order Clone() {

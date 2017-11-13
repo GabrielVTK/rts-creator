@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class MovementOrder : Order {
@@ -6,7 +7,6 @@ public class MovementOrder : Order {
     public List<Unit> units;
     private List<Vector2> movements;
     public Vector2 destiny;
-    private float timeCounter;
     private bool rangeConsidered;
 
     private MovementOrder() {}
@@ -43,7 +43,23 @@ public class MovementOrder : Order {
 
         this.movements = pathfinding.GetPath();        
     }
-    
+
+    public override bool Cooldown() {
+
+        if (this.units.Count == 0 || this.movements.Count == 0) {
+            this.isActive = false;
+            return true;
+        }
+
+        if (this.timeCounter >= GameController.newUnitTime) {
+            this.timeCounter -= GameController.newUnitTime;
+            return false;
+        }
+
+        this.timeCounter += GameController.newUnitTime * GameController.staticGameSpeed * this.units[0].walkSpeed / GameController.map.tiles[(int)this.movements[0].y, (int)this.movements[0].x].terraineType;
+        return true;
+    }
+
     public override void Execute() {
         
         if (!this.isActive || this.movements.Count == 0 || this.units.Count == 0) {
@@ -57,48 +73,41 @@ public class MovementOrder : Order {
         }
 
         Map map = GameController.map;
+        
+        bool walk = true, discovered = false;
 
-        if(this.timeCounter < GameController.unitTime) {
-            this.timeCounter += Time.deltaTime * this.units[0].walkSpeed / map.tiles[(int)this.movements[0].y, (int)this.movements[0].x].terraineType;
-        } else {
-
-            bool walk = true, discovered = false;
-
-            foreach(Unit unit in this.units) {
-                if(!unit.Walk(this.movements[0])) {
-                    walk = false;
-                    break;
-                }
+        foreach(Unit unit in this.units) {
+            if(!unit.Walk(this.movements[0])) {
+                walk = false;
+                break;
             }
+        }
 
-            if(walk) {
+        if(walk) {
 
-                int x, y;
+            int x, y;
 
-                for(x = (int)this.units[0].position.x - this.units[0].visionField; x <= (int)this.units[0].position.x + this.units[0].visionField; x++) {
-                    for(y = (int)this.units[0].position.y - this.units[0].visionField; y <= (int)this.units[0].position.y + this.units[0].visionField; y++) {
+            for(x = (int)this.units[0].position.x - this.units[0].visionField; x <= (int)this.units[0].position.x + this.units[0].visionField; x++) {
+                for(y = (int)this.units[0].position.y - this.units[0].visionField; y <= (int)this.units[0].position.y + this.units[0].visionField; y++) {
 
-                        if (x >= 0 && x < map.width && y >= 0 && y < map.height) {
+                    if (x >= 0 && x < map.width && y >= 0 && y < map.height) {
                         
-                            int dist = Mathf.Abs(x - (int)this.units[0].position.x) + Mathf.Abs(y - (int)this.units[0].position.y);
+                        int dist = Mathf.Abs(x - (int)this.units[0].position.x) + Mathf.Abs(y - (int)this.units[0].position.y);
 
-                            if (GameController.players[this.units[0].idPlayer].fog.tiles[y, x].unknown && dist <= this.units[0].visionField) {
-                                GameController.players[this.units[0].idPlayer].fog.tiles[y, x].Destroy();
-                                discovered = true;
-                            }
+                        if (GameController.players[this.units[0].idPlayer].fog.tiles[y, x].unknown && dist <= this.units[0].visionField) {
+                            GameController.players[this.units[0].idPlayer].fog.tiles[y, x].Destroy();
+                            discovered = true;
                         }
                     }
                 }
-
             }
 
-            if (walk && !discovered) {
-                this.movements.RemoveAt(0);
-            } else {
-                this.NewPath();
-            }
+        }
 
-            this.timeCounter -= GameController.unitTime;
+        if (walk && !discovered) {
+            this.movements.RemoveAt(0);
+        } else {
+            this.NewPath();
         }
 
     }

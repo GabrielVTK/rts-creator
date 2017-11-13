@@ -8,7 +8,6 @@ public class TrainUnitOrder : Order {
     private Player player;
     public List<Unit> units;
     private Building building;
-    private float timeCounter;
 
     public TrainUnitOrder(Player player, Building building) {
         this.idPlayer = player.id;
@@ -22,6 +21,23 @@ public class TrainUnitOrder : Order {
         this.units.Add(unit);
     }
 
+    public override bool Cooldown() {
+
+        if (this.units.Count == 0) {
+            this.isActive = false;
+            return true;
+        }
+
+        if (this.timeCounter >= GameController.newUnitTime * this.units[0].developTime) {
+            this.timeCounter = 0;
+            return false;
+        }
+
+        this.timeCounter += GameController.newUnitTime * GameController.staticGameSpeed;
+
+        return true;
+    }
+
     public override void Execute() {
         
         if(this.units.Count == 0) {
@@ -30,28 +46,20 @@ public class TrainUnitOrder : Order {
             GameObject.Find("GameController").GetComponent<GameController>().DrawInfoMaterials();
             return;
         }
+        
+        this.units[0].idPlayer = this.player.id;
 
-        if(this.timeCounter < GameController.unitTime * this.units[0].developTime) {
-            this.timeCounter += Time.deltaTime;
-        } else {
-            
-            this.units[0].idPlayer = this.player.id;
-
-            if (this.units[0].GetType() == typeof(Worker)) {
-                Worker worker = (Worker)this.units[0];
-                worker.returnBuilding = this.building;
-            }
-
-            this.units[0].position = new Vector2(this.building.position.x - 1.0f, this.building.position.y - 1.0f);
-            this.units[0].Draw();
-
-            this.player.units.Add(this.units[0].id, this.units[0]);
-
-            this.units.RemoveAt(0);
-            
-            this.timeCounter = 0;
+        if (this.units[0].GetType() == typeof(Worker)) {
+            Worker worker = (Worker)this.units[0];
+            worker.returnBuilding = this.building;
         }
 
+        this.units[0].position = new Vector2(this.building.position.x - 1.0f, this.building.position.y - 1.0f);
+        this.units[0].Draw();
+
+        this.player.units.Add(this.units[0].id, this.units[0]);
+
+        this.units.RemoveAt(0);
     }
 
 }

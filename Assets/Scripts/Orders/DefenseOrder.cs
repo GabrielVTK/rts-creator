@@ -71,6 +71,16 @@ public class DefenseOrder : Order {
         return false;
     }
 
+    public override bool Cooldown() {
+
+        if (this.units.Count == 0) {
+            this.isActive = false;
+            return true;
+        }
+
+        return false;
+    }
+
     public override void Execute() {
 
         if(building.isAttacked) {
@@ -79,7 +89,10 @@ public class DefenseOrder : Order {
                 this.AUO = new AttackUnitOrder(this.units, GameController.players[building.idPlayer].action.GetUnitsEnemyIsAttacking(this.building), this.isConcentrated);
             }
 
-            this.AUO.Execute();
+            if(!this.AUO.Cooldown()) {
+                this.AUO.Execute();
+            }
+            
         } else {
 
             this.AUO = null;
@@ -99,7 +112,10 @@ public class DefenseOrder : Order {
                     this.MO = new MovementOrder(this.idPlayer, this.units, this.building.position, false, false);
                 }
 
-                this.MO.Execute();
+                if (!this.MO.Cooldown()) {
+                    this.MO.Execute();
+                }
+
             }
             
         }
@@ -120,5 +136,5 @@ public class DefenseOrder : Order {
 
         return DO;
     }
-
+    
 }

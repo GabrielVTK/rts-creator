@@ -7,8 +7,12 @@ public abstract class Order {
     public int idPlayer;
 
     public bool isActive = true;
+
+    protected float timeCounter;
     
     public abstract void Execute();
+
+    public abstract bool Cooldown();
 
     protected void RemoveAnotherOrder(List<Unit> units) {
 

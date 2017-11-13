@@ -20,21 +20,22 @@ struct Params {
 };
 
 public class GameController : MonoBehaviour {
-
-    public float timeOut;
-
+    
     public static Map map = new Map();
 	public static Player[] players;
 
-    public static bool draw = true;
+    public static bool draw = false;
 
 	public static GameComponents gameComponents;
 
-    public float unitTimeUnity = 0.0001f;
-	public static float unitTime = 10.0f;
+    //public float unitTimeUnity = 0.0001f;
+	//public static float unitTime = 10.0f;
 	public float cameraSpeed;
 
-    private float counterTime;
+    // Game Time
+    public float gameSpeed = 1000;
+    public static float staticGameSpeed = 1000;
+    public static float newUnitTime = 0.005f;
 
 	// Scroll View
 	public float contentWidth = 350.0f;
@@ -66,12 +67,12 @@ public class GameController : MonoBehaviour {
     private bool playGame;
 
     public ulong ciclos;
+    public float counterTime;
 
     void Start() {
 
+        // Log
         this.ciclos = 0;
-
-        this.timeOut = 500.0f;
         this.counterTime = 0.0f;
 
         this.playGame = false;
@@ -171,16 +172,16 @@ public class GameController : MonoBehaviour {
 
         this.playGame = true;
     }
-    
-    void Update() {
-        
-        this.counterTime += Time.deltaTime;
 
-        this.ciclos++;
+    void Update() {
 
         if (this.playGame) {
 
-            unitTime = this.unitTimeUnity;
+            GameController.staticGameSpeed = this.gameSpeed;
+            
+            this.counterTime += Time.deltaTime;
+
+            this.ciclos++;
 
             // Informações
             if (Input.GetKeyDown("space")) {
@@ -208,7 +209,7 @@ public class GameController : MonoBehaviour {
                 ShowFog();
                 CenterCamera();
             }
-            
+
             Camera camera = Camera.main;
 
             // Movement Horizontal
@@ -244,15 +245,9 @@ public class GameController : MonoBehaviour {
                 camera.orthographicSize += 1;
             }
 
-        }
+            
 
-    }
-
-    void FixedUpdate() {
-    
-        if(this.playGame) {
-
-		    this.UpdateInfo();
+            this.UpdateInfo();
 
             // IA Script
             for (int p = 0; p < 2; p++) {
@@ -264,20 +259,22 @@ public class GameController : MonoBehaviour {
                 /**/
 			    if(!players[p].isHuman) {
 
-				    float timeAction = 10 * unitTime;
+				    float timeAction = 10 * newUnitTime;
 
 				    if (players[p].script.timeActionCounter >= timeAction) {
                         players[p].script.Main();
                         players[p].script.timeActionCounter -= timeAction;
 				    } else {
-					    players[p].script.timeActionCounter += Time.deltaTime;
+					    players[p].script.timeActionCounter += GameController.newUnitTime;
 				    }
 
 			    }
                 /**/
             
                 foreach (Order order in players[p].orders) {
-                    order.Execute();
+                    if(!order.Cooldown()) {
+                        order.Execute();
+                    }
                 }
 
 			    players[p].CleanProperties();
@@ -1309,11 +1306,10 @@ public class GameController : MonoBehaviour {
 
             players[i].propertiesDestroied.Clear();
         }
-
-        //int propertiesP1 = GameController.players[0].units.Count + GameController.players[0].buildings.Count;
-        //int propertiesP2 = GameController.players[1].units.Count + GameController.players[1].buildings.Count;
+        
         int buildingsP1 = GameController.players[0].buildings.Count;
         int buildingsP2 = GameController.players[1].buildings.Count;
+
         if (buildingsP1 == 0 || buildingsP2 == 0) {
 
             if(buildingsP1 > buildingsP2) {
@@ -1326,30 +1322,6 @@ public class GameController : MonoBehaviour {
 
             return true;
         }
-        
-        /**
-        // Limite de tempo
-        if(this.counterTime >= this.timeOut) {
-            Debug.Log("Tempo de partida excedido!");
-
-            int propertiesP1 = buildingsP1 + GameController.players[0].units.Count;
-            int propertiesP2 = buildingsP2 + GameController.players[1].units.Count;
-
-            if(propertiesP1 >= propertiesP2) {
-
-                foreach (Building buildingItem in players[1].buildings.Values) {
-                    buildingItem.Destroy();
-                }
-
-            } else {
-                foreach (Building buildingItem in players[0].buildings.Values) {
-                    buildingItem.Destroy();
-                }
-            }
-
-            return true;
-        }
-        /**/
 
         return false;
     }

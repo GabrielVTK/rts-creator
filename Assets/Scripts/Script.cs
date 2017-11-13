@@ -176,7 +176,7 @@ public class Script {
 
             Vector3 pos = player.action.GetNearTile(this.myBase.Count > 0 ? this.myBase[0] : this.buildingHelp);
 
-            if (pos.x != -1.0f && pos.y != -1.0f) {
+            if (pos.x != -1.0f && pos.y != -1.0f && this.workersAvailable.Count > 0) {
                 player.action.Build((Worker)this.workersAvailable[0], pos, "Quarter");
             } else {
                 this.ExploreMap();

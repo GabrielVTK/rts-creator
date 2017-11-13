@@ -79,6 +79,23 @@ public class AttackUnitOrder : AttackOrder {
         return (this.targets[0].life > 0) ? this.targets[0] : null;
     }
 
+    public override bool Cooldown() {
+
+        if (this.units.Count == 0) {
+            this.isActive = false;
+            return true;
+        }
+
+        if (this.timeCounter >= GameController.newUnitTime) {
+            this.timeCounter -= GameController.newUnitTime;
+            return false;
+        }
+
+        this.timeCounter += GameController.newUnitTime * this.units[0].attackSpeed * GameController.staticGameSpeed;
+
+        return true;
+    }
+
     public override void Execute() {
 
         if (!this.isActive) {
@@ -105,44 +122,37 @@ public class AttackUnitOrder : AttackOrder {
                 this.movementOrder = null;
             }
 
-            if(this.timeCounter < GameController.unitTime) {
-                this.timeCounter += Time.deltaTime * this.units[0].attackSpeed;
-            } else {
+            Unit target;
 
-                Unit target;
+            foreach(Unit unit in this.units) {
 
-                foreach(Unit unit in this.units) {
+                target = this.GetTarget();
 
-                    target = this.GetTarget();
-
-                    if(target == null) {
-                        GameController.players[(this.units[0].idPlayer == 0 ? 1 : 0)].enemyAttackOrders.Remove(this);
-                        this.isActive = false;
-                        break;
-                    }
-
-                    target.isAttacked = true;
-
-                    unit.Attack(target);
-
-                    if(target.life <= 0) {
-                        //GameController.players[target.idPlayer].population--;
-                        this.targets.Remove(target);
-                        GameController.players[target.idPlayer].propertiesDestroied.Add(target);
-                        target = null;
-                    }
-
-                    if(this.targets.Count == 0) {
-                        GameController.players[(this.units[0].idPlayer == 0 ? 1 : 0)].enemyAttackOrders.Remove(this);
-                        this.isActive = false;
-                        break;
-                    }
-
+                if(target == null) {
+                    GameController.players[(this.units[0].idPlayer == 0 ? 1 : 0)].enemyAttackOrders.Remove(this);
+                    this.isActive = false;
+                    break;
                 }
 
-                this.timeCounter -= GameController.unitTime;
-            }
+                target.isAttacked = true;
 
+                unit.Attack(target);
+
+                if(target.life <= 0) {
+                    //GameController.players[target.idPlayer].population--;
+                    this.targets.Remove(target);
+                    GameController.players[target.idPlayer].propertiesDestroied.Add(target);
+                    target = null;
+                }
+
+                if(this.targets.Count == 0) {
+                    GameController.players[(this.units[0].idPlayer == 0 ? 1 : 0)].enemyAttackOrders.Remove(this);
+                    this.isActive = false;
+                    break;
+                }
+
+            }
+            
         } else {
 
             if(!this.isActive) {
@@ -153,7 +163,10 @@ public class AttackUnitOrder : AttackOrder {
                 this.movementOrder = new MovementOrder(this.idPlayer, this.units, targets[0].position, true, false);
             }
 
-            this.movementOrder.Execute();
+            if(!this.movementOrder.Cooldown()) {
+                this.movementOrder.Execute();
+            }
+
         }
 
     }

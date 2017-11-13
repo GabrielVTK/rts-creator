@@ -7,7 +7,6 @@ public abstract class AttackOrder : Order {
 
     public List<Unit> units;
     public MovementOrder movementOrder;
-    protected float timeCounter;
 
     protected AttackOrder(List<Unit> units) {
        

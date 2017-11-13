@@ -8,7 +8,6 @@ public class BuildOrder : Order {
     public List<Worker> workers;
     public Building building;
     private MovementOrder movementOrder;
-    private float timeCounter;
 
     private BuildOrder() {}
 
@@ -75,6 +74,18 @@ public class BuildOrder : Order {
         return false;
     }
 
+    public override bool Cooldown() {
+
+        if(this.timeCounter >= GameController.newUnitTime) {
+            this.timeCounter -= GameController.newUnitTime;
+            return false;
+        }
+
+        this.timeCounter += GameController.newUnitTime * GameController.staticGameSpeed;
+
+        return true;
+    }
+
     public override void Execute() {
         
         if(this.isActive && this.CheckDistance()) {
@@ -85,36 +96,29 @@ public class BuildOrder : Order {
                 }
                 this.movementOrder = null;
             }
-
-            if(this.timeCounter < GameController.unitTime) {
-                this.timeCounter += Time.deltaTime;
-            } else {
-
-                foreach(Worker worker in this.workers) {
-                    if(!worker.Build(this.building)) {
-                        break;
-                    }
+            
+            foreach(Worker worker in this.workers) {
+                if(!worker.Build(this.building)) {
+                    break;
                 }
-                
-                if(this.building.constructed) {
-                    this.isActive = false;
-                    this.building.RemoveFog();
-
-                    foreach (Worker worker in this.workers) {
-                        worker.isBusy = false;
-                    }
-
-                    if (this.building.producedMaterial != null) {
-                        GameController.players[this.building.idPlayer].standbyOrders.Add(new ProduceMaterialOrder(this.idPlayer, this.building));
-                    }
-
-                }                
-
-                GameObject.Find("GameController").GetComponent<GameController>().DrawViewContent();
-                GameObject.Find("GameController").GetComponent<GameController>().DrawViewInfo();
-
-                this.timeCounter -= GameController.unitTime;
             }
+                
+            if(this.building.constructed) {
+                this.isActive = false;
+                this.building.RemoveFog();
+
+                foreach (Worker worker in this.workers) {
+                    worker.isBusy = false;
+                }
+
+                if (this.building.producedMaterial != null) {
+                    GameController.players[this.building.idPlayer].standbyOrders.Add(new ProduceMaterialOrder(this.idPlayer, this.building));
+                }
+
+            }                
+
+            GameObject.Find("GameController").GetComponent<GameController>().DrawViewContent();
+            GameObject.Find("GameController").GetComponent<GameController>().DrawViewInfo();
 
         } else {
             
@@ -147,5 +151,5 @@ public class BuildOrder : Order {
 
         return BO;
     }
-
+    
 }

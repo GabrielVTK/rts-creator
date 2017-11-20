@@ -183,8 +183,10 @@ public class GameComponents {
 		int height = (this.map.isReflected && (this.map.directionReflected == 'N' || this.map.directionReflected == 'S')) ? this.map.height / 2 : this.map.height;
 		int width = (this.map.isReflected && (this.map.directionReflected == 'E' || this.map.directionReflected == 'W')) ? this.map.width / 2 : this.map.width;
 
-		for(int i = 0; i < height; i++) {
-			for(int j = 0; j < width; j++) {
+        int i, j;
+
+        for(i = 0; i < height; i++) {
+			for(j = 0; j < width; j++) {
                 this.mapTile[i, j] = tilesList[i * width + j];
                 this.mapComponent[i, j] = componentsList[i * width + j];
 			}

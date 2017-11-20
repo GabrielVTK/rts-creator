@@ -342,9 +342,11 @@ public class Building : Property {
 
 		GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
 		Map map = GameController.map;
-        
-		for(int i = (int)this.position.y; i < (int)(this.position.y + this.size.y); i++) {
-			for(int j = (int)this.position.x; j < (int)(this.position.x + this.size.x); j++) {
+
+        int i, j;
+
+        for (i = (int)this.position.y; i < (int)(this.position.y + this.size.y); i++) {
+			for(j = (int)this.position.x; j < (int)(this.position.x + this.size.x); j++) {
 
 				if(map.tiles[i, j].mapComponent == null) {
 					map.tiles[i, j].isWalkable = true;
@@ -359,8 +361,8 @@ public class Building : Property {
 			}
 		}
 
-		for(int i = (int)this.position.y - 1; i < ((int)this.position.y + (int)this.size.x + 1); i++) {
-			for(int j = (int)this.position.x - 1; j < ((int)this.position.x + (int)this.size.y + 1); j++) {
+		for(i = (int)this.position.y - 1; i < ((int)this.position.y + (int)this.size.x + 1); i++) {
+			for(j = (int)this.position.x - 1; j < ((int)this.position.x + (int)this.size.y + 1); j++) {
 				if(gameController.CheckCanBuild(i, j)) {
 					map.tiles[i, j].isWalkable = true;
 					map.tiles[i, j].canBuild = true;
@@ -407,16 +409,18 @@ public class Building : Property {
 		Player player = GameController.players [this.idPlayer];
 		Map map = GameController.map;
 
-		for(int i = (int)this.position.y; i < (int)this.position.y + (int)this.size.y; i++) {
-			for(int j = (int)this.position.x; j < (int)this.position.x + (int)this.size.x; j++) {
+        int i, j, iFog, jFog, dist;
 
-				for(int iFog = (int)this.position.y - this.visionField; iFog < (int)this.position.y + (int)this.size.y + this.visionField; iFog++) {
+        for (i = (int)this.position.y; i < (int)this.position.y + (int)this.size.y; i++) {
+			for(j = (int)this.position.x; j < (int)this.position.x + (int)this.size.x; j++) {
 
-					for(int jFog = (int)this.position.x - this.visionField; jFog < (int)this.position.x + (int)this.size.x + this.visionField; jFog++) {
+				for(iFog = (int)this.position.y - this.visionField; iFog < (int)this.position.y + (int)this.size.y + this.visionField; iFog++) {
+
+					for(jFog = (int)this.position.x - this.visionField; jFog < (int)this.position.x + (int)this.size.x + this.visionField; jFog++) {
 
 						if (iFog >= 0 && iFog < map.height && jFog >= 0 && jFog < map.width) {
                             
-							int dist = Mathf.Abs(jFog - j) + Mathf.Abs(iFog - i);
+							dist = Mathf.Abs(jFog - j) + Mathf.Abs(iFog - i);
 
 							if(dist <= this.visionField && player.fog.tiles[iFog, jFog].unknown) {
                                 //Debug.Log("Destroi FOG");

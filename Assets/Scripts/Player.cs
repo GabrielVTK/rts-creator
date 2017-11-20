@@ -207,6 +207,9 @@ public class Player {
             this.orders.Remove(order);
             //Debug.Log(order.GetType());
             if(order.GetType().BaseType == typeof(AttackOrder)) {
+
+                AttackOrder AO = (AttackOrder)order;
+                
                 GameController.players[(this.id == 0 ? 1 : 0)].enemyAttackOrders.Remove((AttackOrder)order);
             }
         }
@@ -214,7 +217,6 @@ public class Player {
         foreach(Order order in this.standbyOrders) {
             this.orders.Add(order);
         }
-        
 		
         ordersClean.Clear();
         this.standbyOrders.Clear();

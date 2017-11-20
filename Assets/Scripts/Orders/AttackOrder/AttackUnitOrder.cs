@@ -81,8 +81,14 @@ public class AttackUnitOrder : AttackOrder {
 
     public override bool Cooldown() {
 
-        if (this.units.Count == 0) {
+        if (this.units.Count == 0 || this.targets.Count == 0) {
+            GameController.players[(this.idPlayer == 0 ? 1 : 0)].enemyAttackOrders.Remove(this);
             this.isActive = false;
+
+            foreach (Unit unit in this.targets) {
+                unit.isAttacked = false;
+            }
+
             return true;
         }
 
@@ -91,7 +97,7 @@ public class AttackUnitOrder : AttackOrder {
             return false;
         }
 
-        this.timeCounter += GameController.newUnitTime * this.units[0].attackSpeed * GameController.staticGameSpeed;
+        this.timeCounter += GameController.newUnitTime * this.units[0].attackSpeed;
 
         return true;
     }
@@ -101,17 +107,6 @@ public class AttackUnitOrder : AttackOrder {
         if (!this.isActive) {
             return;
         }
-
-        if (this.units.Count == 0) {
-            GameController.players[(this.idPlayer == 0 ? 1 : 0)].enemyAttackOrders.Remove(this);
-            this.isActive = false;
-
-            foreach(Unit unit in this.targets) {
-                unit.isAttacked = false;
-            }
-
-            return;
-        }        
 
         if(this.CheckDistance()) {
 
@@ -139,7 +134,6 @@ public class AttackUnitOrder : AttackOrder {
                 unit.Attack(target);
 
                 if(target.life <= 0) {
-                    //GameController.players[target.idPlayer].population--;
                     this.targets.Remove(target);
                     GameController.players[target.idPlayer].propertiesDestroied.Add(target);
                     target = null;
@@ -154,11 +148,7 @@ public class AttackUnitOrder : AttackOrder {
             }
             
         } else {
-
-            if(!this.isActive) {
-                return;
-            }
-
+            
             if(this.movementOrder == null || this.movementOrder.destiny != this.targets[0].position) {
                 this.movementOrder = new MovementOrder(this.idPlayer, this.units, targets[0].position, true, false);
             }

@@ -33,9 +33,7 @@ public class GameController : MonoBehaviour {
 	public float cameraSpeed;
 
     // Game Time
-    public float gameSpeed = 1000;
-    public static float staticGameSpeed = 1000;
-    public static float newUnitTime = 0.005f;
+    public static float newUnitTime = 0.05f;
 
 	// Scroll View
 	public float contentWidth = 350.0f;
@@ -74,7 +72,7 @@ public class GameController : MonoBehaviour {
         // Log
         this.ciclos = 0;
         this.counterTime = 0.0f;
-
+        
         this.playGame = false;
 
         StartCoroutine(RunGame());
@@ -103,7 +101,9 @@ public class GameController : MonoBehaviour {
         // Players
         players = new Player[2];
 
-        for(int p = 0; p < 2; p++) {
+        int p;
+
+        for(p = 0; p < 2; p++) {
             players[p] = new Player(p, "Player " + (p + 1), 500, false);
             players[p].AddBaseMaterial("Gold", 1000);
             players[p].AddBaseMaterial("Meat", 1000);
@@ -117,8 +117,9 @@ public class GameController : MonoBehaviour {
             players[1].scriptAttributes = scriptP2;
 
             Params[] playersParams = new Params[2];
+            int i;
 
-            for(int i = 0; i < 2; i++) {
+            for(i = 0; i < 2; i++) {
                 playersParams[i].comidaInicio = players[i].scriptAttributes.GetAttribute("EARLYMEAT");
                 playersParams[i].ouroInicio = players[i].scriptAttributes.GetAttribute("EARLYGOLD");
                 playersParams[i].qntTrabalhadores = players[i].scriptAttributes.GetAttribute("WORKERS");
@@ -134,28 +135,28 @@ public class GameController : MonoBehaviour {
             File.WriteAllText(Application.dataPath + "/StreamingAssets/game" + PlayerPrefs.GetInt("GameCount") + "/geracao" + AG.numGeracao + "_rodada" + TorneioTabela.rodada + "_partida" + GameInitializer.rountCount + "_players.json", Json.SerializeToString<Params[]>(playersParams));
         } else {
 
-            players[0].scriptAttributes.AddAttribute("EARLYMEAT", 41.7582436f);
-            players[0].scriptAttributes.AddAttribute("EARLYGOLD", 58.24176f);
-            players[0].scriptAttributes.AddAttribute("WORKERS", 39);
-            players[0].scriptAttributes.AddAttribute("MATERIALPERMIN", 290);
-            players[0].scriptAttributes.AddAttribute("MIDMEAT", 50f);
-            players[0].scriptAttributes.AddAttribute("MIDGOLD", 50f);
-            players[0].scriptAttributes.AddAttribute("INFANTRY", 49.4736862f);
-            players[0].scriptAttributes.AddAttribute("ARCHER", 21.578949f);
-            players[0].scriptAttributes.AddAttribute("CAVALRY", 28.9473686f);
-            players[0].scriptAttributes.AddAttribute("TROOP", 100);
+            players[0].scriptAttributes.AddAttribute("EARLYMEAT", 56.6474f);
+            players[0].scriptAttributes.AddAttribute("EARLYGOLD", 43.3526039f);
+            players[0].scriptAttributes.AddAttribute("WORKERS", 91);
+            players[0].scriptAttributes.AddAttribute("MATERIALPERMIN", 597);
+            players[0].scriptAttributes.AddAttribute("MIDMEAT", 51.4970055f);
+            players[0].scriptAttributes.AddAttribute("MIDGOLD", 48.5029945f);
+            players[0].scriptAttributes.AddAttribute("INFANTRY", 33.5f);
+            players[0].scriptAttributes.AddAttribute("ARCHER", 21.5f);
+            players[0].scriptAttributes.AddAttribute("CAVALRY", 45);
+            players[0].scriptAttributes.AddAttribute("TROOP", 27);
 
-            players[1].scriptAttributes.AddAttribute("EARLYMEAT", 34);
-            players[1].scriptAttributes.AddAttribute("EARLYGOLD", 66);
-            players[1].scriptAttributes.AddAttribute("WORKERS", 6);
-            players[1].scriptAttributes.AddAttribute("MATERIALPERMIN", 980);
-            players[1].scriptAttributes.AddAttribute("MIDMEAT", 66.99029f);
-            players[1].scriptAttributes.AddAttribute("MIDGOLD", 33.00971f);
-            players[1].scriptAttributes.AddAttribute("INFANTRY", 21.022728f);
-            players[1].scriptAttributes.AddAttribute("ARCHER", 50);
-            players[1].scriptAttributes.AddAttribute("CAVALRY", 28.977272f);
-            players[1].scriptAttributes.AddAttribute("TROOP", 385);
-            
+            players[1].scriptAttributes.AddAttribute("EARLYMEAT", 42);
+            players[1].scriptAttributes.AddAttribute("EARLYGOLD", 58);
+            players[1].scriptAttributes.AddAttribute("WORKERS", 20);
+            players[1].scriptAttributes.AddAttribute("MATERIALPERMIN", 318);
+            players[1].scriptAttributes.AddAttribute("MIDMEAT", 27.0270271f);
+            players[1].scriptAttributes.AddAttribute("MIDGOLD", 72.97298f);
+            players[1].scriptAttributes.AddAttribute("INFANTRY", 3.053435f);
+            players[1].scriptAttributes.AddAttribute("ARCHER", 74.80916f);
+            players[1].scriptAttributes.AddAttribute("CAVALRY", 22.1374035f);
+            players[1].scriptAttributes.AddAttribute("TROOP", 364);
+
         }
 
         positionBase[0] = players[0].action.GetBuilding("Base")[0].model.transform.position;
@@ -176,13 +177,7 @@ public class GameController : MonoBehaviour {
     void Update() {
 
         if (this.playGame) {
-
-            GameController.staticGameSpeed = this.gameSpeed;
             
-            this.counterTime += Time.deltaTime;
-
-            this.ciclos++;
-
             // Informações
             if (Input.GetKeyDown("space")) {
                 /**/
@@ -245,7 +240,16 @@ public class GameController : MonoBehaviour {
                 camera.orthographicSize += 1;
             }
 
-            
+        }
+    }
+
+    private void FixedUpdate() {
+     
+        if (this.playGame) {
+
+            this.counterTime += GameController.newUnitTime;
+
+            this.ciclos++;
 
             this.UpdateInfo();
 
@@ -259,13 +263,13 @@ public class GameController : MonoBehaviour {
                 /**/
 			    if(!players[p].isHuman) {
 
-				    float timeAction = 10 * newUnitTime;
+				    float timeAction = 10 * GameController.newUnitTime;
 
 				    if (players[p].script.timeActionCounter >= timeAction) {
                         players[p].script.Main();
                         players[p].script.timeActionCounter -= timeAction;
 				    } else {
-					    players[p].script.timeActionCounter += GameController.newUnitTime;
+                        players[p].script.timeActionCounter += GameController.newUnitTime;
 				    }
 
 			    }
@@ -431,12 +435,13 @@ public class GameController : MonoBehaviour {
 		GameObject[] peacesP2 = GameObject.FindGameObjectsWithTag("Fog P2");
 
 		bool isP1 = (this.currentPlayer == 0) ? true : false;
+        int i;
 
-		for(int i = 0; i < peacesP1.Length; i++) {
+        for(i = 0; i < peacesP1.Length; i++) {
 			peacesP1[i].GetComponent<MeshRenderer> ().enabled = isP1;
 		}
 
-		for(int i = 0; i < peacesP2.Length; i++) {
+		for(i = 0; i < peacesP2.Length; i++) {
 			peacesP2[i].GetComponent<MeshRenderer> ().enabled = !isP1;
 		}
 
@@ -483,8 +488,8 @@ public class GameController : MonoBehaviour {
 
 			if (!isActionButton) {
 				this.objectName = objectName;
-				DrawViewContent ();
-				DrawViewInfo ();
+				DrawViewContent();
+				DrawViewInfo();
 			} else {
 				isActionButton = false;
 			}
@@ -1035,7 +1040,9 @@ public class GameController : MonoBehaviour {
 			    } else if(type.CompareTo("unit") == 0) {
                     
 				    Unit unit = players[int.Parse (variables [0])].units[int.Parse (variables [2])];
-				    //Unit unit = selectedUnits[0];
+                    //Unit unit = selectedUnits[0];
+
+                    Debug.Log("Unit Status: ("+ unit.isWalking + ") - ("+ unit.isBusy + ") - ("+ unit.isAttacked + ")");
 
 				    // Unit icon
 				    GameObject unitIcon = new GameObject ("unitIcon", typeof(Image));
@@ -1290,7 +1297,9 @@ public class GameController : MonoBehaviour {
         Unit unit;
         Building building;
 
-        for(int i = 0; i <= 1; i++) {
+        int i;
+
+        for (i = 0; i <= 1; i++) {
 
             foreach(Property property in players[i].propertiesDestroied) {
 

@@ -24,6 +24,7 @@ public class MovementOrder : Order {
         }
 
         if(units.Count == 0) {
+            Debug.Log("Sem unidades para MovementOrder");
             this.isActive = false;
             return;
         }
@@ -46,7 +47,12 @@ public class MovementOrder : Order {
 
     public override bool Cooldown() {
 
-        if (this.units.Count == 0 || this.movements.Count == 0) {
+        if (!this.isActive || this.units.Count == 0 || this.movements.Count == 0) {
+
+            foreach (Unit unit in this.units) {
+                unit.isWalking = false;
+            }
+
             this.isActive = false;
             return true;
         }
@@ -56,22 +62,12 @@ public class MovementOrder : Order {
             return false;
         }
 
-        this.timeCounter += GameController.newUnitTime * GameController.staticGameSpeed * this.units[0].walkSpeed / GameController.map.tiles[(int)this.movements[0].y, (int)this.movements[0].x].terraineType;
+        this.timeCounter += GameController.newUnitTime * this.units[0].walkSpeed / GameController.map.tiles[(int)this.movements[0].y, (int)this.movements[0].x].terraineType;
         return true;
     }
 
     public override void Execute() {
         
-        if (!this.isActive || this.movements.Count == 0 || this.units.Count == 0) {
-
-            foreach (Unit unit in this.units) {
-                unit.isWalking = false;
-            }
-
-            this.isActive = false;
-            return;
-        }
-
         Map map = GameController.map;
         
         bool walk = true, discovered = false;
@@ -102,6 +98,16 @@ public class MovementOrder : Order {
                 }
             }
 
+        }
+
+        if(this.movements.Count == 0) {
+            this.isActive = false;
+
+            foreach(Unit unit in this.units) {
+                unit.isWalking = false;
+            }
+
+            return;
         }
 
         if (walk && !discovered) {

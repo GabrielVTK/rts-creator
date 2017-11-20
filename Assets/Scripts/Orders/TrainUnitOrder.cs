@@ -23,8 +23,10 @@ public class TrainUnitOrder : Order {
 
     public override bool Cooldown() {
 
-        if (this.units.Count == 0) {
+        if(this.units.Count == 0) {
             this.isActive = false;
+            this.building.trainUnitOrder = null;
+            GameObject.Find("GameController").GetComponent<GameController>().DrawInfoMaterials();
             return true;
         }
 
@@ -33,20 +35,13 @@ public class TrainUnitOrder : Order {
             return false;
         }
 
-        this.timeCounter += GameController.newUnitTime * GameController.staticGameSpeed;
+        this.timeCounter += GameController.newUnitTime;
 
         return true;
     }
 
     public override void Execute() {
-        
-        if(this.units.Count == 0) {
-            this.isActive = false;
-            this.building.trainUnitOrder = null;
-            GameObject.Find("GameController").GetComponent<GameController>().DrawInfoMaterials();
-            return;
-        }
-        
+                
         this.units[0].idPlayer = this.player.id;
 
         if (this.units[0].GetType() == typeof(Worker)) {

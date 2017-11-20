@@ -16,8 +16,10 @@ public class AG : MonoBehaviour {
 
     public static int numGeracao;
 
-    void Start() {
+    private int geracaoIni;
 
+    void Start() {
+        
         String[] args = Environment.GetCommandLineArgs();
 
         if (!PlayerPrefs.HasKey("GameCount")) {
@@ -45,14 +47,21 @@ public class AG : MonoBehaviour {
 
         AG.numGeracao = 0;
 
+        this.geracaoIni = AG.numGeracao;
+
+        Time.timeScale = 50;
+        Debug.Log("TimeScale: " + Time.timeScale);
+
         StartCoroutine(CriaGeracoes(10000));
     }
 
     public IEnumerator CriaGeracoes(int numeroGeracoes) {
-        
+
         //IndividuoAG[] Npopulacao = new IndividuoAG[populacao.Length];
-        
-        for (int i = 0; i < numeroGeracoes; i++) {
+
+        int i, p;
+
+        for(i = this.geracaoIni; i < numeroGeracoes; i++) {
 
             this.salvarGeracao(i);
 
@@ -71,7 +80,7 @@ public class AG : MonoBehaviour {
 
             Dictionary<int, float> aptidao = new Dictionary<int, float>();
 
-            for(int p = 0; p < AG.populacao.Length; p++) {
+            for(p = 0; p < AG.populacao.Length; p++) {
                 aptidao.Add(p, AG.populacao[p].getPontuacao());
             }
 
@@ -81,7 +90,7 @@ public class AG : MonoBehaviour {
             cruzamento(pais);
 
             Debug.Log("Volta do cruzamento");
-
+            
             while (!AG.proxGeracao) {
                 yield return null;
             }
@@ -121,17 +130,17 @@ public class AG : MonoBehaviour {
              8 - % Cavalaria   0 - 100%
              9 - Quantidade de tropa antes de iniciar ataque   10 - 500
          */
-         
-        for (int i = 0; i < AG.populacao.Length; i++) {
+
+        int i;
+
+        for (i = 0; i < AG.populacao.Length; i++) {
 
             float[] cromossomo = new float[10];
    
             cromossomo[0] = UnityEngine.Random.Range(0, 101);
             cromossomo[1] = UnityEngine.Random.Range(0, 101);
             cromossomo[2] = UnityEngine.Random.Range(4, 101);
-            //cromossomo[2] = UnityEngine.Random.Range(5, 16);
             cromossomo[3] = UnityEngine.Random.Range(100, 1001);
-            //cromossomo[3] = UnityEngine.Random.Range(60, 241);
             cromossomo[4] = UnityEngine.Random.Range(0, 101);
             cromossomo[5] = UnityEngine.Random.Range(0, 101);
             cromossomo[6] = UnityEngine.Random.Range(0, 101);
@@ -139,7 +148,6 @@ public class AG : MonoBehaviour {
             cromossomo[8] = UnityEngine.Random.Range(0, 101);
             //cromossomo[9] = UnityEngine.Random.Range(10, 501);
             cromossomo[9] = UnityEngine.Random.Range(10, 401); // Baixado de 500 para 400 devido ao limite populacional
-            //cromossomo[9] = UnityEngine.Random.Range(5, 21);
 
             AG.populacao[i] = new IndividuoAG();
             AG.populacao[i].setCromossomo(cromossomo);
@@ -170,23 +178,28 @@ public class AG : MonoBehaviour {
         //após todos os jogadores terem suas pontuações do torneio suiço
         //calcula a pontuação total e "roda a roleta"
 
+        int i;
         float pontuacaoTotal = 0f;
-        for(int i = 0; i < AG.populacao.Length; i++){
+
+        for (i = 0; i < AG.populacao.Length; i++){
             pontuacaoTotal += AG.populacao[i].getPontuacao();
         }
 
         //IndividuoAG[] pai = new IndividuoAG[populacao.Length/2];
-        
+
 
         //com a pontuacao total, é sorteado um numero aleatorio e identifica qual indivíduo que está na posição do numero sorteado;  
         //Roleta beaseada no link
         //https://sofiaia.wordpress.com/2008/07/15/algoritmos-geneticos-parte-3/
 
-        for (int i = 0; i < (AG.populacao.Length/2); i++) {
-            int numeroSorteado = UnityEngine.Random.Range(0, (int) pontuacaoTotal + 1);
-            float somaPontos = 0f;
+        int j, numeroSorteado;
+        float somaPontos;
+
+        for (i = 0; i < (AG.populacao.Length/2); i++) {
+            numeroSorteado = UnityEngine.Random.Range(0, (int) pontuacaoTotal + 1);
+            somaPontos = 0f;
             
-            for(int j = 0; j < AG.populacao.Length; j++) {
+            for(j = 0; j < AG.populacao.Length; j++) {
                 somaPontos += AG.populacao[j].getPontuacao();
                 if (somaPontos >= numeroSorteado) {
                     pais[i] = AG.populacao[j];
@@ -205,20 +218,21 @@ public class AG : MonoBehaviour {
         // Cruzamento com média ponderada usando peso aleatório
         // http://www2.peq.coppe.ufrj.br/Pessoal/Professores/Arge/COQ897/Naturais/aulas_piloto/aula4.pdf
 
-        int geracaoAtual = pais[0].getGeracao();
-        int count = 0;
+        int geracaoAtual = pais[0].getGeracao(), count = 0, par, i;
+        float mediaPonderada;
+        float[] filho1, filho2;
 
         IndividuoAG[] novaGeracao = new IndividuoAG[pais.Length*2];
         do {
 
-            int par = UnityEngine.Random.Range(0, pais.Length);
+            par = UnityEngine.Random.Range(0, pais.Length);
 
             if (par != count) {
-                float mediaPonderada = UnityEngine.Random.Range(1, 100) / 100f;
-                float[] filho1 = new float[pais[0].getCromossomos().Length];
-                float[] filho2 = new float[pais[0].getCromossomos().Length];
+                mediaPonderada = UnityEngine.Random.Range(1, 100) / 100f;
+                filho1 = new float[pais[0].getCromossomos().Length];
+                filho2 = new float[pais[0].getCromossomos().Length];
 
-                for (int i = 0; i < pais[0].getCromossomos().Length; i++) {
+                for (i = 0; i < pais[0].getCromossomos().Length; i++) {
                     filho1[i] = ( (1-mediaPonderada) * pais[count].getCromossomos()[i]) + (mediaPonderada * pais[par].getCromossomos()[i]);
                     filho2[i] = ( mediaPonderada  * pais[count].getCromossomos()[i]) + ((1 - mediaPonderada) * pais[par].getCromossomos()[i]);
                 }
@@ -255,8 +269,10 @@ public class AG : MonoBehaviour {
          */
 
         bool teste = false;
+        int i, cromossomoEscolhido, valor;
+        float[] cromossomo;
 
-        for (int i = 0; i < AG.populacao.Length; i++) {
+        for(i = 0; i < AG.populacao.Length; i++) {
 
             //   Chance de aplicar mutação de 2% para cada indivíduo da população
             if (UnityEngine.Random.Range(0, 101) < 3) {
@@ -264,15 +280,14 @@ public class AG : MonoBehaviour {
                 teste = true;
 
                 //Mutação ocorrerá de forma a alterar o gene aleatório do cromossomo escolhido
-                float[] cromossomo = AG.populacao[i].getCromossomos();
-                int cromossomoEscolhido = UnityEngine.Random.Range(0, 10);
+                cromossomo = AG.populacao[i].getCromossomos();
+                cromossomoEscolhido = UnityEngine.Random.Range(0, 10);
 
                 //Aplicando um valor maior ou menor de -10 a 10  (caso negativo transforma o valor em zero)
-                int valor = UnityEngine.Random.Range(-10, 11);
+                valor = UnityEngine.Random.Range(-10, 11);
                 if ((cromossomo[cromossomoEscolhido] + valor) <= 0) {
                     cromossomo[cromossomoEscolhido] = 0;
-                }
-                else {
+                } else {
 
                     //soma o valor positivo ou negativo ao gene do cromossomo
                     cromossomo[cromossomoEscolhido] = (cromossomo[cromossomoEscolhido] + valor);
@@ -291,14 +306,17 @@ public class AG : MonoBehaviour {
 
     //Função para normalizar os dados do cromossomo, usada ao inicializar a população onde os dados são aleatórios e após os crusamentos
     void normalizaCromossomo() {
+        int i;
+        float valorBase;
+        float[] cromossomo;
 
-        for (int i = 0; i < AG.populacao.Length; i++) {
+        for (i = 0; i < AG.populacao.Length; i++) {
 
-            float[] cromossomo = AG.populacao[i].getCromossomos();
+            cromossomo = AG.populacao[i].getCromossomos();
             /*
                Soma do parametro 0 e 1 tem que dar 100%    (Comida e ouro inicial)
             */
-            float valorBase = 100f / (AG.populacao[i].getCromossomos()[0] + AG.populacao[i].getCromossomos()[1]);
+            valorBase = 100f / (AG.populacao[i].getCromossomos()[0] + AG.populacao[i].getCromossomos()[1]);
             cromossomo[0] = AG.populacao[i].getCromossomos()[0] * valorBase;
             cromossomo[1] = AG.populacao[i].getCromossomos()[1] * valorBase;
 
@@ -324,8 +342,9 @@ public class AG : MonoBehaviour {
     
     private void salvarGeracao(int geracao) {
         Params[] popParams = new Params[AG.populacao.Length];
+        int i;
 
-        for (int i = 0; i < AG.populacao.Length; i++) {
+        for(i = 0; i < AG.populacao.Length; i++) {
             popParams[i].comidaInicio = AG.populacao[i].getCromossomos()[0];
             popParams[i].ouroInicio = AG.populacao[i].getCromossomos()[1];
             popParams[i].qntTrabalhadores = AG.populacao[i].getCromossomos()[2];

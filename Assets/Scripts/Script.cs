@@ -11,7 +11,7 @@ public class Script {
     private bool showDebug;
 
     private float penaltyCounter;
-    private int penaltyIntensity; 
+    private int penaltyIntensity;
     private bool penalty;
 
     private bool searchBase;
@@ -20,15 +20,18 @@ public class Script {
     private Building buildingHelp;
     private List<Unit> workersAvailable;
 
+    private Unit enemyWorker;
+
     public Script(Player player) {
 		this.player = player;
 		this.timeActionCounter = 0.0f;
 
-        this.showDebug = true;
+        this.showDebug = false;
         this.penaltyCounter = 0;
         this.penaltyIntensity = 3;
         this.penalty = false;
         this.searchBase = true;
+        this.enemyWorker = null;
     }
     
     public void Main() {
@@ -89,7 +92,7 @@ public class Script {
 
         return false;
     }
-
+        
     private bool CheckResources() {
 
         if((player.action.GetProductionRate("Meat") + player.action.GetProductionRate("Gold")) < player.scriptAttributes.GetAttribute("MATERIALPERMIN") / 60) {
@@ -100,7 +103,7 @@ public class Script {
             if(this.workersAvailable.Count > 0) {
 
                 // % de comida < Parâmetro 1?
-                if(player.action.GetProductionRate("Meat") < (player.scriptAttributes.GetAttribute("EARLYMEAT") * player.scriptAttributes.GetAttribute("MATERIALPERMIN") / 60 / 100)) {
+                if(player.action.GetProductionRate("Meat") < ((player.scriptAttributes.GetAttribute("EARLYMEAT") / 100) * (player.scriptAttributes.GetAttribute("MATERIALPERMIN") / 60))) {
 
                     this.ShowMessage("Comida baixa (inicio)");
 
@@ -160,6 +163,13 @@ public class Script {
                 //Qtd. Trabalhadores < Parâmetro 3?
                 if (player.action.GetAmountUnit("Worker") < player.scriptAttributes.GetAttribute("WORKERS") && this.myBase.Count > 0) {
                     player.action.AddUnit(this.myBase[0], "Worker");
+                } else {
+                    this.ShowMessage("Não é possível criar trabalhadores ("+ player.action.GetAmountUnit("Worker") + "). Aguarde...");
+
+                    if(player.action.GetAmountUnit("Worker") == 0) {
+                        this.Suicide();
+                    }
+
                 }
 
             }
@@ -190,7 +200,7 @@ public class Script {
 
     private bool CheckRateMidGame() {
 
-        if(player.action.GetProductionRate("Meat") < (player.scriptAttributes.GetAttribute("MIDMEAT") * player.scriptAttributes.GetAttribute("MATERIALPERMIN") / 60 / 100)) {
+        if(this.workersAvailable.Count > 0 && player.action.GetProductionRate("Meat") < ((player.scriptAttributes.GetAttribute("MIDMEAT") / 100) * (player.scriptAttributes.GetAttribute("MATERIALPERMIN") / 60))) {
 
             this.ShowMessage("Comida baixa (meio)!");
 
@@ -231,6 +241,11 @@ public class Script {
                 this.penalty = false;
             }
 
+            if (((player.action.GetProductionRate("Meat") + player.action.GetProductionRate("Gold")) >= player.scriptAttributes.GetAttribute("MATERIALPERMIN") / 60) &&
+                (player.action.GetProductionRate("Gold") == 0 || player.action.GetProductionRate("Meat") == 0)) {
+                this.Suicide();
+            }
+
             return true;
         }
 
@@ -250,7 +265,9 @@ public class Script {
                 this.searchBase = false;
                 player.action.Attack(player.action.GetTroop(), enemyBase[0]);
                 return true;
-            } 
+            } else {
+                this.ShowMessage("Base ainda não encontrada!");
+            }
 
         } else {
 
@@ -262,7 +279,14 @@ public class Script {
             if(enemyWorkers.Count > 0) {
 
                 this.ShowMessage("Ataca trabalhadores inimigos!");
-                player.action.Attack(player.action.GetTroop(), enemyWorkers[0], true);
+                
+                if(this.enemyWorker == null || !enemyWorkers.Contains(this.enemyWorker)) {
+                    this.ShowMessage(player.action.GetTroop()[0].model.name + " ataca " + enemyWorkers[0].model.name);
+                    this.enemyWorker = enemyWorkers[0];
+                }
+
+                player.action.Attack(player.action.GetTroop(), this.enemyWorker, true);
+                
                 return true;
 
             } else if(enemyBuildings.Count > 0) {
@@ -279,6 +303,8 @@ public class Script {
 
     private void ExploreMap() {
 
+        this.ShowMessage("ExploreMap()!");
+
         if (this.workersAvailable.Count > 0) {
             player.action.ExploreMap(this.workersAvailable[0]);
         } else if (this.myBase.Count > 0) {
@@ -288,14 +314,18 @@ public class Script {
         } else if (player.action.VerifyBuildingExists("Quarter")) {
             player.action.AddUnit(player.action.GetBuilding("Quarter")[0], "Infantary");
         } else {
-
-            foreach (Building buildingItem in this.player.buildings.Values) {
-                this.player.propertiesDestroied.Add(buildingItem);
-            }
-
-            Debug.Log("Impossível criar outra undidade! P" + this.player.id + " perdeu!");
+            this.Suicide();
         }
 
+    }
+
+    private void Suicide() {
+        
+        this.ShowMessage("Impossível continuar jogo! P" + this.player.id + " perdeu!");
+
+        foreach (Building buildingItem in this.player.buildings.Values) {
+            this.player.propertiesDestroied.Add(buildingItem);
+        }        
     }
 
     private void ShowMessage(string message) {

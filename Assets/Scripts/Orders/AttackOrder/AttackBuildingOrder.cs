@@ -80,6 +80,8 @@ public class AttackBuildingOrder : AttackOrder {
     public override bool Cooldown() {
 
         if (this.units.Count == 0) {
+            GameController.players[(this.idPlayer == 0 ? 1 : 0)].enemyAttackOrders.Remove(this);
+            this.target.isAttacked = false;
             this.isActive = false;
             return true;
         }
@@ -89,7 +91,7 @@ public class AttackBuildingOrder : AttackOrder {
             return false;
         }
 
-        this.timeCounter += GameController.newUnitTime * this.units[0].attackSpeed * GameController.staticGameSpeed;
+        this.timeCounter += GameController.newUnitTime * this.units[0].attackSpeed;
 
         return true;
     }

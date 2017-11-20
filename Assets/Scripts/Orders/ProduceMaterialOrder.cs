@@ -19,7 +19,7 @@ public class ProduceMaterialOrder : Order {
             return false;
         }
 
-        this.timeCounter += GameController.newUnitTime * GameController.staticGameSpeed;
+        this.timeCounter += GameController.newUnitTime;
 
         return true;
     }

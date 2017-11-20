@@ -66,8 +66,11 @@ public class Map {
 			this.mapComponent = gameComponents.mapComponent;
 		}
 
-		for(int i = 0; i < this.height; i++) {
-			for(int j = 0; j < this.width; j++) {
+        int i, j;
+
+
+        for (i = 0; i < this.height; i++) {
+			for(j = 0; j < this.width; j++) {
 				this.tiles[i, j] =  gameComponents.tiles[this.mapTile[i, j]].Instantiate ();
 
 				if(this.mapComponent[i, j] != 0 && this.tiles[i, j].isWalkable && i > 1 && i < (this.height - 1) && j > 1 && j < (this.width - 1)) {
@@ -82,18 +85,20 @@ public class Map {
 
 		}
 
-		// Set canBuild = false, where isWalkable = false
-		for(int i = 0; i < this.height; i++) {
-			for(int j = 0; j < this.width; j++) {
+        int x, y, lineIni, lineFin, columnIni, columnFin;
+
+        // Set canBuild = false, where isWalkable = false
+        for (i = 0; i < this.height; i++) {
+			for(j = 0; j < this.width; j++) {
 
 				if(!this.tiles[i, j].isWalkable) {
-					int lineIni = (i - 1) >= 0 ? (i - 1) : i;
-					int lineFin = (i + 1) < this.height ? (i + 1) : i;
-					int columnIni = (j - 1) >= 0 ? (j - 1) : j;
-					int columnFin = (j + 1) < this.width ? (j + 1) : j;
+					lineIni = (i - 1) >= 0 ? (i - 1) : i;
+					lineFin = (i + 1) < this.height ? (i + 1) : i;
+					columnIni = (j - 1) >= 0 ? (j - 1) : j;
+					columnFin = (j + 1) < this.width ? (j + 1) : j;
 
-					for(int y = lineIni; y <= lineFin; y++) {
-						for(int x = columnIni; x <= columnFin; x++) {
+					for(y = lineIni; y <= lineFin; y++) {
+						for(x = columnIni; x <= columnFin; x++) {
 							this.tiles[y, x].canBuild = false;
 						}
 					}
@@ -107,17 +112,18 @@ public class Map {
 	private void ReflectNorth(int[,] mapTile, int[,] mapComponent) {
 
 		int line = 0, column = 0;
+        int i, j;
 
-		for(int i = (this.height / 2) - 1; i >= 0; i--, line++) {
-			for(int j = this.width - 1; j >= 0; j--, column++) {
+        for (i = (this.height / 2) - 1; i >= 0; i--, line++) {
+			for(j = this.width - 1; j >= 0; j--, column++) {
 				this.mapTile[line, column] = mapTile[i, j];
 				this.mapComponent[line, column] = mapComponent[i, j];
 			}
 			column = 0;
 		}
 
-		for(int i = 0; i < this.height / 2; i++, line++) {
-			for(int j = 0; j < this.width; j++, column++) {
+		for(i = 0; i < this.height / 2; i++, line++) {
+			for(j = 0; j < this.width; j++, column++) {
 				this.mapTile[line, column] = mapTile[i, j];
 				this.mapComponent[line, column] = mapComponent[i, j];
 			}
@@ -129,9 +135,10 @@ public class Map {
 	private void ReflectSouth(int[,] mapTile, int[,] mapComponent) {
 
 		int line = 0, column = 0;
+        int i, j;
 
-		for(int i = 0; i < this.height / 2; i++, line++) {
-			for(int j = 0; j < this.width; j++, column++) {
+        for (i = 0; i < this.height / 2; i++, line++) {
+			for(j = 0; j < this.width; j++, column++) {
 
 				this.mapTile[line, column] = mapTile[i, j];
 				this.mapComponent[line, column] = mapComponent[i, j];
@@ -139,8 +146,8 @@ public class Map {
 			column = 0;
 		}
 
-		for(int i = (this.height / 2) - 1; i >= 0; i--, line++) {
-			for(int j = this.width - 1; j >= 0; j--, column++) {
+		for(i = (this.height / 2) - 1; i >= 0; i--, line++) {
+			for(j = this.width - 1; j >= 0; j--, column++) {
 				this.mapTile[line, column] = mapTile[i, j];
 				this.mapComponent[line, column] = mapComponent[i, j];
 			}
@@ -152,17 +159,18 @@ public class Map {
 	private void ReflectEast(int[,] mapTile, int[,] mapComponent) {
 
 		int line = 0, column = 0;
+        int i, j;
 
-		for(int j = 0; j < (this.width / 2); j++, column++) {
-			for(int i = 0; i < this.height; i++, line++) {
+        for (j = 0; j < (this.width / 2); j++, column++) {
+			for(i = 0; i < this.height; i++, line++) {
 				this.mapTile[line, column] = mapTile[i, j];
 				this.mapComponent[line, column] = mapComponent[i, j];
 			}
 			line = 0;
 		}
 
-		for(int j = (this.width / 2) - 1; j >= 0; j--, column++) {
-			for(int i = this.height - 1; i >= 0 ; i--, line++) {
+		for(j = (this.width / 2) - 1; j >= 0; j--, column++) {
+			for(i = this.height - 1; i >= 0 ; i--, line++) {
 				this.mapTile[line, column] = mapTile[i, j];
 				this.mapComponent[line, column] = mapComponent[i, j];
 			}
@@ -174,17 +182,18 @@ public class Map {
 	private void ReflectWest(int[,] mapTile, int[,] mapComponent) {
 
 		int line = 0, column = 0;
+        int i, j;
 
-		for(int j = (this.width / 2) - 1; j >= 0; j--, column++) {
-			for(int i = this.height - 1; i >= 0 ; i--, line++) {
+        for (j = (this.width / 2) - 1; j >= 0; j--, column++) {
+			for(i = this.height - 1; i >= 0 ; i--, line++) {
 				this.mapTile[line, column] = mapTile[i, j];
 				this.mapComponent[line, column] = mapComponent[i, j];
 			}
 			line = 0;
 		}
 
-		for(int j = 0; j < (this.width / 2); j++, column++) {
-			for(int i = 0; i < this.height; i++, line++) {
+		for(j = 0; j < (this.width / 2); j++, column++) {
+			for(i = 0; i < this.height; i++, line++) {
 				this.mapTile[line, column] = mapTile[i, j];
 				this.mapComponent[line, column] = mapComponent[i, j];
 			}
@@ -201,9 +210,12 @@ public class Map {
             float yIni = (float)this.GetTileSize() * (this.height - 1) / 2;
             
             GameObject tile = new GameObject("tile", typeof(Canvas));
+            int i, j;
+            string name;
+            GameObject tileComponent;
 
-            for (int i = 0; i < this.height; i++) {
-                for (int j = 0; j < this.width; j++) {
+            for (i = 0; i < this.height; i++) {
+                for(j = 0; j < this.width; j++) {
                     this.tiles[i, j].model = GameObject.Instantiate(this.tiles[i, j].model);
                     this.tiles[i, j].model.name = "0_tile_" + i + "_" + j;
                     this.tiles[i, j].model.transform.position = new Vector3(xIni + j * this.GetTileSize(), 0.0f, yIni - i * this.GetTileSize());
@@ -211,13 +223,13 @@ public class Map {
                     
                     if (this.tiles[i, j].mapComponent != null) {
 
-                        string name = "obstacle";
+                        name = "obstacle";
 
                         if (this.tiles[i, j].mapComponent.GetType() == typeof(MaterialSource)) {
                             name = "source";
                         }
 
-                        GameObject tileComponent = GameObject.Instantiate(this.tiles[i, j].mapComponent.model);
+                        tileComponent = GameObject.Instantiate(this.tiles[i, j].mapComponent.model);
                         this.tiles[i, j].mapComponent.model = tileComponent;
                         tileComponent.transform.SetParent(tile.transform);
                         tileComponent.name = "0_" + name + "_" + i + "_" + j;

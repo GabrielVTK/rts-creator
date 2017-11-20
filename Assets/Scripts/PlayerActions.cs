@@ -123,6 +123,8 @@ public class PlayerActions {
             targets.Add(target);
 
             this.AttackUnit(units, targets, isConcentrated);
+        } else {
+            Debug.Log("NoAttack -> ("+units.Count+") e ("+target+")");
         }
     }
 
@@ -547,74 +549,7 @@ public class PlayerActions {
         if(units.Count == 0) {
             return;
         }
-
-        /**
-        int blocksNumberW = Mathf.CeilToInt(GameController.map.width / 4.0f);
-        int blocksNumberH = Mathf.CeilToInt(GameController.map.height / 4.0f);
-
-        bool[,] blocksUnknown = new bool[blocksNumberH, blocksNumberW];
-
-        int line = 0, column = 0;
-
-        while (line < blocksNumberH) {
-
-            while (column < blocksNumberW) {
-
-                bool unknown = false;
-                int unknownTiles = 0;
-
-                for (int i = line * 4; i < line * 4 + 4; i++) {
-                    for (int j = column * 4; j < column * 4 + 4; j++) {
-
-                        if (i < map.height && j < map.width) {
-                            if (this.player.fog.tiles[i, j].unknown) {
-                                unknownTiles++;
-                            }
-
-                            if (unknownTiles >= 10) {
-                                unknown = true;
-                                break;
-                            }
-                        }
-
-                    }
-
-                    if (unknown) {
-                        break;
-                    }
-                }
-
-                blocksUnknown[line, column] = unknown;
-
-                column++;
-            }
-
-            column = 0;
-            line++;
-        }
-
-        Unit unit = units[0];
-        Vector2 bestPosition = new Vector2();
-        float bestScore = 0, score = 0;
         
-        for (int i = 0; i < blocksNumberH; i++) {
-            for (int j = 0; j < blocksNumberW; j++) {
-
-                if(blocksUnknown[i, j]) {
-
-                    score = Mathf.Abs(i * 4 + 1 - unit.position.y) + Mathf.Abs(j * 4 + 1 - unit.position.x);
-
-                    if(bestScore == 0 || score < bestScore) {
-                        bestScore = score;
-                        bestPosition = new Vector2(i + 1, j + 1);
-                    }
-
-                }
-
-            }
-        }
-        /**/
-
         BlockExploration block = this.player.fog.GetBetterBlockPotential();
 
         if(block != null) {
@@ -632,8 +567,10 @@ public class PlayerActions {
         
 		foreach(Building building in enemy.buildings.Values) {
 
-			for(int i = (int)building.position.y; i < (int)(building.position.y + building.size.y); i++) {
-				for(int j = (int)building.position.x; j < (int)(building.position.x + building.size.x); j++) {
+            int i, j;
+            
+            for (i = (int)building.position.y; i < (int)(building.position.y + building.size.y); i++) {
+				for(j = (int)building.position.x; j < (int)(building.position.x + building.size.x); j++) {
 
 					if(!player.fog.tiles[i, j].unknown) {
 

@@ -33,11 +33,11 @@ public class Fog {
         }
 
     }
-
+    
     public void CalculateBlocksPotential() {
-
+        
         int i, j;
-
+        
         for (i = 0; i < this.blocks.GetLength(0); i++) {
             for (j = 0; j < this.blocks.GetLength(1); j++) {
                 this.blocks[i, j].CalculatePotential();
@@ -49,28 +49,45 @@ public class Fog {
 
     public BlockExploration GetBetterBlockPotential() {
 
-        BlockExploration bestBlock = null;
-        BlockExploration blockMostUnknow = null;
+        int counterTilesUnknow = 0, i, j;
+        BlockExploration bestBlock = null, blockMostUnknow = null;
+        
+        if(this.idPlayer == 0) {
+            for (i = 0; i < this.blocks.GetLength(0); i++) {
+                for (j = 0; j < this.blocks.GetLength(1); j++) {
+                    this.blocks[i, j].CalculatePotential();
 
-        int counterTilesUnknow = 0;
+                    if (counterTilesUnknow < this.blocks[i, j].count) {
+                        counterTilesUnknow = this.blocks[i, j].count;
+                        blockMostUnknow = this.blocks[i, j];
+                    }
 
-        foreach (BlockExploration block in this.blocks) {
-
-            if(counterTilesUnknow < block.count) {
-                counterTilesUnknow = block.count;
-                blockMostUnknow = block;
+                    if (this.blocks[i, j].unknown && (bestBlock == null || this.blocks[i, j].potential > bestBlock.potential)) {
+                        bestBlock = this.blocks[i, j];
+                    }
+                }
             }
+        } else {
+            for (i = this.blocks.GetLength(0) - 1; i >= 0; i--) {
+                for (j = this.blocks.GetLength(1) - 1; j >= 0; j--) {
+                    this.blocks[i, j].CalculatePotential();
 
-            if(block.unknown && (bestBlock == null || block.potential > bestBlock.potential)) {
-                bestBlock = block;
+                    if (counterTilesUnknow < this.blocks[i, j].count) {
+                        counterTilesUnknow = this.blocks[i, j].count;
+                        blockMostUnknow = this.blocks[i, j];
+                    }
+
+                    if (this.blocks[i, j].unknown && (bestBlock == null || this.blocks[i, j].potential > bestBlock.potential)) {
+                        bestBlock = this.blocks[i, j];
+                    }
+                }
             }
-
         }
 
-        if(bestBlock == null) {
+        if (bestBlock == null) {
             bestBlock = blockMostUnknow;
         }
-        
+
         return bestBlock;
     }
 

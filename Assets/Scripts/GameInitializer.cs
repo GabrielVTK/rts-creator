@@ -21,15 +21,18 @@ public class GameInitializer : MonoBehaviour {
     public IEnumerator RunGame() {
         
         string path = Application.dataPath + "/StreamingAssets/game" + PlayerPrefs.GetInt("GameCount");
-        
+
+        int i;
         int[] wins = new int[GameInitializer.p1ScriptAttributes.Count];
-        for (int w = 0; w < GameInitializer.p1ScriptAttributes.Count; w++) {
-            wins[w] = -1;
+        for (i = 0; i < GameInitializer.p1ScriptAttributes.Count; i++) {
+            wins[i] = -1;
         }
 
         File.WriteAllText(path + "/geracao" + AG.numGeracao + "_rodada" + TorneioTabela.rodada + "_vitorias.json", Json.SerializeToString<int[]>(wins));
-        
-        for (int i = 0; i < GameInitializer.p1ScriptAttributes.Count; i++) {
+
+        Scene game;
+
+        for (i = 0; i < GameInitializer.p1ScriptAttributes.Count; i++) {
 
             GameInitializer.rountCount = i;
             
@@ -37,7 +40,7 @@ public class GameInitializer : MonoBehaviour {
             GameController.scriptP2 = p2ScriptAttributes[i];
             SceneManager.LoadScene("game", LoadSceneMode.Additive);
 
-            Scene game = SceneManager.GetSceneByName("game");
+            game = SceneManager.GetSceneByName("game");
             
             while(!game.isLoaded) {
                 yield return null;
@@ -49,7 +52,9 @@ public class GameInitializer : MonoBehaviour {
                 //Debug.Log("Aguarda finalinar o game");
                 yield return null;
             }
-            
+
+            System.GC.Collect();
+            System.Threading.Thread.Sleep(3000);
         }
 
         Debug.Log("Todas as partidas do round foram executadas!");

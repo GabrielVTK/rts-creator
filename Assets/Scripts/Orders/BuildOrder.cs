@@ -81,14 +81,18 @@ public class BuildOrder : Order {
             return false;
         }
 
-        this.timeCounter += GameController.newUnitTime * GameController.staticGameSpeed;
+        this.timeCounter += GameController.newUnitTime;
 
         return true;
     }
 
     public override void Execute() {
-        
-        if(this.isActive && this.CheckDistance()) {
+
+        if (!this.isActive) {
+            return;
+        }
+
+        if(this.CheckDistance()) {
 
             if(this.movementOrder != null) {
                 foreach(Worker worker in this.workers) {

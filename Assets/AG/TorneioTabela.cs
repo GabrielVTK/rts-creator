@@ -24,29 +24,39 @@ public class TorneioTabela : MonoBehaviour {
 
         Debug.Log("DivideJogadas()");
 
-        for (int round = 0; round < rounds; round++) {
+        int round, i;
+        int[] visitados;
+        bool sair;
+
+        List<ScriptAttributes> scriptsP1, scriptsP2;
+        Dictionary<ScriptAttributes, int> jogadores;
+
+        for (round = 0; round < rounds; round++) {
             
-            bool sair = false;
+            sair = false;
 
             //cria array para controlar os jogadores que ja jogaram nessa rodada
-            int[] visitados = new int[AG.populacao.Length];
+            visitados = new int[AG.populacao.Length];
         
             //inicializa array
             visitados = reiniciaVisitados(visitados);
 
-            List<ScriptAttributes> scriptsP1 = new List<ScriptAttributes>();
-            List<ScriptAttributes> scriptsP2 = new List<ScriptAttributes>();
+            scriptsP1 = new List<ScriptAttributes>();
+            scriptsP2 = new List<ScriptAttributes>();
+            
+            jogadores = new Dictionary<ScriptAttributes, int>();
 
-
-
-            Dictionary<ScriptAttributes, int> jogadores = new Dictionary<ScriptAttributes, int>();
+            float maior1, maior2;
+            int posMaior1, posMaior2;
 
             do {
-                float maior1 = -1f, maior2 = -1f;
-                int posMaior1 = -1, posMaior2 = -1;
+                maior1 = -1f;
+                maior2 = -1f;
+                posMaior1 = -1;
+                posMaior2 = -1;
             
                 //busca jogador com maior pontuacao não visitado e guarda posição
-                for (int i = 0; i < AG.populacao.Length; i++) {
+                for (i = 0; i < AG.populacao.Length; i++) {
                     if(maior1 < AG.populacao[i].getPontuacao() && visitados[i]==0) {
                         maior1 = AG.populacao[i].getPontuacao();
                         posMaior1 = i;
@@ -55,9 +65,8 @@ public class TorneioTabela : MonoBehaviour {
 
                 visitados[posMaior1] = 1;
 
-
                 //busca segundo jogador com maior pontuacao não visitado e que ainda não batalhou contra o jogador 1 e guarda posicao
-                for (int i = 0; i < AG.populacao.Length; i++) {
+                for (i = 0; i < AG.populacao.Length; i++) {
                     if ((AG.populacao[i].getPontuacao() > maior2) && visitados[i] == 0 && (!AG.populacao[posMaior1].getOponentes().Contains(i))) {
                         maior2 = AG.populacao[i].getPontuacao();
                         posMaior2 = i;
@@ -66,7 +75,7 @@ public class TorneioTabela : MonoBehaviour {
 
 
                 if (posMaior2 == -1) {
-                    for (int i = 0; i < AG.populacao.Length; i++) {                    
+                    for (i = 0; i < AG.populacao.Length; i++) {                    
                         if ((AG.populacao[i].getPontuacao() > maior2) && visitados[i] == 0 ) {                        
                             maior2 = AG.populacao[i].getPontuacao();
                             posMaior2 = i;
@@ -142,7 +151,7 @@ public class TorneioTabela : MonoBehaviour {
                 //Debug.Log("Aguarda finalinar o gameInitializer");
                 yield return null;
             }
-
+            
             Debug.Log("Fim do round " + round);
 
             Log log = new Log();
@@ -150,7 +159,7 @@ public class TorneioTabela : MonoBehaviour {
             int[] wins = log.GetWins();
             int indice;
 
-            for (int i = 0; i < wins.Length; i++) {
+            for (i = 0; i < wins.Length; i++) {
                 
                 indice = -1;
 
@@ -179,6 +188,9 @@ public class TorneioTabela : MonoBehaviour {
             }
 
             calculaPontuacaoTotal();
+
+            System.GC.Collect();
+            System.Threading.Thread.Sleep(3000);
         }
 
     }
@@ -186,7 +198,9 @@ public class TorneioTabela : MonoBehaviour {
     //Testa se todos os jogadores ja jogaram essa rodada
     bool todosVisitados(int[] visitados) {
 
-        for (int i = 0; i < visitados.Length; i++) {
+        int i;
+
+        for (i = 0; i < visitados.Length; i++) {
             if (visitados[i] == 0) {
                 return false;
             }
@@ -198,7 +212,9 @@ public class TorneioTabela : MonoBehaviour {
     //Inicializa array de visitado para controlar se todos os jogadores jogam a partida
     int[] reiniciaVisitados(int[] visitados) {
 
-        for (int i = 0; i < visitados.Length; i++){
+        int i;
+
+        for(i = 0; i < visitados.Length; i++){
 			visitados[i] = 0;
 		}
 
@@ -208,7 +224,9 @@ public class TorneioTabela : MonoBehaviour {
     //inicializa array de pontuacao e vitorias
     public void iniciaPontuacao() {
 
-        for (int i = 0; i < AG.populacao.Length; i++) {
+        int i;
+
+        for(i = 0; i < AG.populacao.Length; i++) {
             AG.populacao[i].setPontuacao(0f);
             AG.populacao[i].setVitorias(0);
         }
@@ -217,13 +235,16 @@ public class TorneioTabela : MonoBehaviour {
 
     //Soma (total de vitoria dos jogadores  * 3 ) + (Cada vitoria dos oponentes do jogadores * 0,3)
     void calculaPontuacaoTotal() {
-        
-        for (int i = 0; i < AG.populacao.Length; i++) {
+
+        int i;
+        float totalPontos;
+
+        for (i = 0; i < AG.populacao.Length; i++) {
 
             //quantidade de vitorias do jogador *3
-            float totalPontos = (AG.populacao[i].getVitorias() * 3.0f);
+            totalPontos = (AG.populacao[i].getVitorias() * 3.0f);
             
-            foreach (int j in AG.populacao[i].getOponentes()) {
+            foreach(int j in AG.populacao[i].getOponentes()) {
                 //Quantidade de vitoria dos oponentes do jogador * 0.3
                 totalPontos = totalPontos + (AG.populacao[j].getVitorias() * 0.3f);                
             }

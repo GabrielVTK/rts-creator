@@ -38,7 +38,7 @@ public class Unit : Property {
     public bool Walk(Vector2 position) {
         
         if(GameController.map.tiles[(int)position.y, (int)position.x].isWalkable) {
-
+            
             this.DrawMove(position);
 
             this.position = position;

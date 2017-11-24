@@ -10,6 +10,7 @@ public class Tile {
 	public bool canBuild;
 	public float terraineType;
 	public MapComponent mapComponent;
+    public List<Unit> units;
 
 	public Tile() {}
 
@@ -19,6 +20,7 @@ public class Tile {
 		this.isWalkable = isWalkable;
 		this.canBuild = canBuild;
 		this.terraineType = terraineType;
+        this.units = new List<Unit>();
 	}
 
 }

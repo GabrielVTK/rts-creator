@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class Node {
 	public Vector2 position;
@@ -26,7 +27,7 @@ public class Pathfinding {
 	private Map map;
 	private Unit unitCurrent;
     
-	private List<Node> opened;
+    private Dictionary<int, Node> opened;
     private Dictionary<int, Node> closed;
 
 	private List<Vector2> movements;
@@ -43,7 +44,7 @@ public class Pathfinding {
         this.origin = origin;
         this.rangeConsidered = rangeConsidered;
         this.destiny = CheckDestiny(destiny);
-        this.opened = new List<Node>();
+        this.opened = new Dictionary<int, Node>();
         this.closed = new Dictionary<int, Node>();
 
 		// Optimizations
@@ -52,18 +53,19 @@ public class Pathfinding {
 
 		this.fog = GameController.players[unit.idPlayer].fog;
         
-		opened.Add(origin);
-	}
+        this.opened.Add((int)(origin.position.y * map.width + origin.position.x), origin);
+    }
 
 	public List<Vector2> GetPath() {
         
 		Node node = null, current;
-		bool bestWay;
+		bool bestWay, nodeBlocked;
 
-		do {
+        int i, j;
+        float g, h;
 
-			int i, j;
-
+        do {
+            
 			current = null;
             
             if (nextExplored != null) {
@@ -73,37 +75,42 @@ public class Pathfinding {
 
 			} else {
 
-				current = this.opened[0];
+                //List<Node> lista= this.opened.Values.OrderBy(o => o.f).ToList();
 
-				for(i = 1; i < this.opened.Count; i++) {
-                    
-					if(this.opened[i].f < current.f) {
-						current = this.opened[i];
-					}
-				}
-                				
-			}
+                /**/
+                foreach (Node nodeOpen in this.opened.Values) {
+                    if(current == null || nodeOpen.f < current.f) {
+                        current = nodeOpen;
+                    }
+                }
+                /**/
 
-            this.opened.Remove(current);
+                //Debug.Log("(Dicionario) Menor nó: " + current.position);
+                //Debug.Log("(ListaOrden) Menor nó: " + lista[0].position);
+            }
+            
+            this.opened.Remove((int)(current.position.y * map.width + current.position.x));
 
             this.closed.Add((int)(current.position.y * map.width + current.position.x), current);
-            
-			// Pega todos os nodos ao redor para calcular o custo heurístico de cada um
-			for(i = (int)current.position.y - 1; i <= (int)current.position.y + 1; i++) {
+                        
+
+            // Pega todos os nodos ao redor para calcular o custo heurístico de cada um
+            for (i = (int)current.position.y - 1; i <= (int)current.position.y + 1; i++) {
 				for(j = (int)current.position.x - 1; j <= (int)current.position.x + 1; j++) {
 
 					if (i >= 0 && i < map.height && j >= 0 && j < map.width && !(i == current.position.y && j == current.position.x)) {
                         
-						bool nodeBlocked = false;
+						nodeBlocked = false;
                         
 						// Verifica se tem fog, se a tile é andável e se a posição é uma tile ao redor da atual
-						if (
-                            ((!fog.tiles[i, j].unknown && map.tiles [i, j].isWalkable) || fog.tiles[i, j].unknown) &&
-                            !((int)current.position.x == j && (int)current.position.y == i)
-                           ) {
+						//if (
+                        //    ((!fog.tiles[i, j].unknown && map.tiles [i, j].isWalkable) || fog.tiles[i, j].unknown) &&
+                        //   !((int)current.position.x == j && (int)current.position.y == i)
+                        //   ) {
 
+                        if(!((int)current.position.x == j && (int)current.position.y == i) && map.tiles[i, j].isWalkable) { 
                             // Verifica se tem unidade no Tile
-                            nodeBlocked = this.HaveUnit(new Vector2(j, i));
+                            nodeBlocked = this.HaveUnit(i, j);
 
 							if(nodeBlocked) { continue; }
 
@@ -112,17 +119,12 @@ public class Pathfinding {
 							if (!nodeBlocked) {
 
 								node = null;
-
-								foreach(Node nodeOpened in this.opened) {
-
-									if(nodeOpened.position.x == j && nodeOpened.position.y == i) {
-										node = nodeOpened;
-										break;
-									}
-
-								}
-
-								float g = current.g + (((int)current.position.x == j || (int)current.position.y == i) ? 10 : 14);
+                                
+                                if(this.opened.ContainsKey(i * map.width + j)) {
+                                    node = this.opened[i * map.width + j];
+                                }
+                                
+								g = current.g + (((int)current.position.x == j || (int)current.position.y == i) ? 10 : 14);
                                 
 								g *= map.tiles[i, j].terraineType;
 
@@ -130,7 +132,7 @@ public class Pathfinding {
 
 									node = new Node(new Vector2(j, i));
                                     
-									float h = (Mathf.Abs(destiny.position.x - j) + Mathf.Abs(destiny.position.y - i)) * 10;
+									h = (Mathf.Abs(destiny.position.x - j) + Mathf.Abs(destiny.position.y - i)) * 10;
                                     
 									node.g = g;
 									node.h = h;
@@ -140,8 +142,8 @@ public class Pathfinding {
 									if(node.f <= current.f) {
 										nextExplored = node;
 									}
-
-                                    this.opened.Add(node);
+                                    
+                                    this.opened.Add((int)(node.position.y * map.width + node.position.x), node);
 
                                 } else if (node.g > g) {
 									
@@ -175,7 +177,6 @@ public class Pathfinding {
 
             while (nav.previous != null) {
                 movements.Add(nav.position);
-
                 nav = nav.previous;
             }
 
@@ -196,9 +197,9 @@ public class Pathfinding {
 
         //Debug.Log("DestinyIn: " + destiny.position);
 
-        if(!GameController.map.tiles[(int)destiny.position.y, (int)destiny.position.x].isWalkable || HaveUnit(destiny.position)) {
+        if(!GameController.map.tiles[(int)destiny.position.y, (int)destiny.position.x].isWalkable || HaveUnit((int)destiny.position.y, (int)destiny.position.x)) {
             
-            int i, j, range = 1, distCurrent = -1, dist;
+            int i, j, range = 1, distCurrent = -1, dist, distRange;
             Vector2 position = destiny.position;
             
             while (distCurrent == -1) {
@@ -208,13 +209,13 @@ public class Pathfinding {
 
                         dist = (int)(Mathf.Abs(i - this.origin.position.y) + Mathf.Abs(destiny.position.x - range - this.origin.position.x));
 
-                        if(destiny.position.x - range >= 0 && !this.HaveUnit(new Vector2((destiny.position.x - range), i)) &&
+                        if(destiny.position.x - range >= 0 && !this.HaveUnit(i, (int)destiny.position.x - range) &&
                            GameController.map.tiles[i, (int)(destiny.position.x - range)].isWalkable &&
                            (distCurrent == -1 || dist < distCurrent)) {
                             
                             if (this.rangeConsidered) {
                                 
-                                int distRange = (int)(Mathf.Abs(destiny.position.x - range - destiny.position.x) + Mathf.Abs(i - destiny.position.y));
+                                distRange = (int)(Mathf.Abs(destiny.position.x - range - destiny.position.x) + Mathf.Abs(i - destiny.position.y));
 
                                 if(distRange <= this.unitCurrent.range) {
                                     distCurrent = dist;
@@ -230,13 +231,13 @@ public class Pathfinding {
 
                         dist = (int)(Mathf.Abs(i - this.origin.position.y) + Mathf.Abs(destiny.position.x + range - this.origin.position.x));
 
-                        if(destiny.position.x + range < map.width && !this.HaveUnit(new Vector2((destiny.position.x + range), i)) &&
+                        if(destiny.position.x + range < map.width && !this.HaveUnit(i, (int)destiny.position.x + range) &&
                            GameController.map.tiles[i, (int)(destiny.position.x + range)].isWalkable &&
                            (distCurrent == -1 || dist < distCurrent)) {
                             
                             if (this.rangeConsidered) {
                             
-                                int distRange = (int)(Mathf.Abs(destiny.position.x + range - destiny.position.x) + Mathf.Abs(i - destiny.position.y));
+                                distRange = (int)(Mathf.Abs(destiny.position.x + range - destiny.position.x) + Mathf.Abs(i - destiny.position.y));
 
                                 if (distRange <= this.unitCurrent.range) {
                                     distCurrent = dist;
@@ -257,13 +258,13 @@ public class Pathfinding {
 
                         dist = (int)(Mathf.Abs(destiny.position.y - range - this.origin.position.y) + Mathf.Abs(j - this.origin.position.x));
 
-                        if(destiny.position.y - range >= 0 && !this.HaveUnit(new Vector2(j, destiny.position.y - range)) &&
+                        if(destiny.position.y - range >= 0 && !this.HaveUnit((int)destiny.position.y - range, j) &&
                           GameController.map.tiles[(int)(destiny.position.y - range), j].isWalkable &&
                           (distCurrent == -1 || dist < distCurrent)) {
                             
                             if (this.rangeConsidered) {
 
-                                int distRange = (int)(Mathf.Abs(j - destiny.position.x) + Mathf.Abs(destiny.position.y - range - destiny.position.y));
+                                distRange = (int)(Mathf.Abs(j - destiny.position.x) + Mathf.Abs(destiny.position.y - range - destiny.position.y));
 
                                 if (distRange <= this.unitCurrent.range) {
                                     distCurrent = dist;
@@ -279,13 +280,13 @@ public class Pathfinding {
 
                         dist = (int)(Mathf.Abs(destiny.position.y + range - this.origin.position.y) + Mathf.Abs(j - this.origin.position.x));
 
-                        if(destiny.position.y + range < map.height && !this.HaveUnit(new Vector2(j, destiny.position.y + range)) &&
+                        if (destiny.position.y + range < map.height && !this.HaveUnit((int)destiny.position.y + range, j) &&
                           GameController.map.tiles[(int)(destiny.position.y + range), j].isWalkable &&
                           (distCurrent == -1 || dist < distCurrent)) {
                             
                             if(this.rangeConsidered) {
 
-                                int distRange = (int)(Mathf.Abs(j - destiny.position.x) + Mathf.Abs(destiny.position.y + range - destiny.position.y));
+                                distRange = (int)(Mathf.Abs(j - destiny.position.x) + Mathf.Abs(destiny.position.y + range - destiny.position.y));
 
                                 if (distRange <= this.unitCurrent.range) {
                                     distCurrent = dist;
@@ -318,22 +319,16 @@ public class Pathfinding {
         return destiny;
     }
 
-    private bool HaveUnit(Vector2 position) {
+    private bool HaveUnit(int i, int j) {
+
+        List<Unit> unitsTile = this.map.tiles[i, j].units;
+
+        if (unitsTile.Count == 0 ||
+           (unitsTile[0].GetType() == this.unitCurrent.GetType() && unitsTile[0].idPlayer == this.unitCurrent.idPlayer)) {
+            return false;
+        }
         
-        foreach(Player player in GameController.players) {
-            foreach (Unit unit in player.units.Values) {
-
-                if(position == unit.position && unitCurrent.position != unit.position &&
-                   ((unit.GetType() != this.unitCurrent.GetType() && player.id == this.unitCurrent.idPlayer) ||
-                   (player.id != this.unitCurrent.idPlayer))) {
-                    //Debug.Log("Tem unidade");
-                    return true;
-                }
-
-            }
-        }       
-
-        return false;
+        return true;
     }
 
 }

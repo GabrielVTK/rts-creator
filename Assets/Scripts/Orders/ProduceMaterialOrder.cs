@@ -45,7 +45,7 @@ public class ProduceMaterialOrder : Order {
 
                 this.building.Destroy();
                 GameController.players[this.building.idPlayer].RemoveProperty(this.building);
-                GameObject.Find("GameController").GetComponent<GameController>().DestroySource(materialSource);
+                GameController.instance.GetComponent<GameController>().DestroySource(materialSource);
 
                 this.isActive = false;
             }
@@ -55,7 +55,7 @@ public class ProduceMaterialOrder : Order {
         GameController.players[this.building.idPlayer].baseMaterials[this.baseMaterial] += this.building.producedPerTime;
         GameController.players[this.building.idPlayer].resourcesCount += this.building.producedPerTime;
 
-        GameObject.Find("GameController").GetComponent<GameController>().DrawInfoMaterials();
+        GameController.instance.GetComponent<GameController>().DrawInfoMaterials();
 
     }
 

@@ -89,6 +89,10 @@ public class AttackUnitOrder : AttackOrder {
                 unit.isAttacked = false;
             }
 
+            if (!this.isActive && units.Count > 0 && units[0].position != units[0].positionInitial) {
+                GameController.players[this.idPlayer].standbyOrders.Add(new MovementOrder(this.idPlayer, units, units[0].positionInitial, false, true, false));
+            }
+
             return true;
         }
 
@@ -146,7 +150,11 @@ public class AttackUnitOrder : AttackOrder {
                 }
 
             }
-            
+
+            if (!this.isActive && units.Count > 0 && units[0].position != units[0].positionInitial) {
+                GameController.players[this.idPlayer].standbyOrders.Add(new MovementOrder(this.idPlayer, units, units[0].positionInitial, false, true, false));
+            }
+
         } else {
             
             if(this.movementOrder == null || this.movementOrder.destiny != this.targets[0].position) {

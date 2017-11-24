@@ -21,12 +21,12 @@ public class Script {
     private List<Unit> workersAvailable;
 
     private Unit enemyWorker;
-
+    
     public Script(Player player) {
 		this.player = player;
 		this.timeActionCounter = 0.0f;
 
-        this.showDebug = false;
+        this.showDebug = true;
         this.penaltyCounter = 0;
         this.penaltyIntensity = 3;
         this.penalty = false;
@@ -35,7 +35,7 @@ public class Script {
     }
     
     public void Main() {
-
+        
         this.myBase = player.action.GetBuilding("Base");
         this.workersAvailable = player.action.GetUnitAvailable("Worker");
 
@@ -328,9 +328,16 @@ public class Script {
         }        
     }
 
+    private float messageTimeCounter = 0;
+
     private void ShowMessage(string message) {
-        if(this.showDebug) {
-            Debug.Log(this.player.name + ": " + message);
+        if (this.showDebug) {
+            if(messageTimeCounter >= 1) {
+                Debug.Log(this.player.name + ": " + message);
+                messageTimeCounter -= 1;
+            } else {
+                this.messageTimeCounter += Time.deltaTime;
+            }            
         }
     }
 

@@ -32,7 +32,6 @@ public class DefenseOrder : Order {
             RemoveAnotherOrder(this.units);
         }
 
-        Debug.Log("DefenseOrder Ativada!");
     }
 
     private bool CheckDistance() {

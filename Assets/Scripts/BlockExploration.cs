@@ -42,13 +42,27 @@ public class BlockExploration {
             return;
         }
 
-        for(i = this.line - MDMAX / 4; i <= this.line + MDMAX / 4; i++) {
+        int iLimit = this.fog.blocks.GetLength(0);
+        int jLimit = this.fog.blocks.GetLength(1);
+        int line, column;
+
+        for (i = this.line - MDMAX / 4; i <= this.line + MDMAX / 4; i++) {
             for (j = this.column - MDMAX / 4; j <= this.column + MDMAX / 4; j++) {
 
-                if(i >= 0 && i < this.fog.blocks.GetLength(0) &&
-                    j >= 0 && j < this.fog.blocks.GetLength(1)) {
+                if(i >= 0 && i < iLimit && j >= 0 && j < jLimit) {
 
-                    md = Mathf.Abs(i - this.line) + Mathf.Abs(j - this.column);
+                    line = i - this.line;
+                    column = j - this.column;
+
+                    if (line < 0) {
+                        line *= -1;
+                    }
+
+                    if (column < 0) {
+                        column *= -1;
+                    }
+
+                    md = line + column;
 
                     if(md <= MDMAX) {
                         this.potential += 0.25f - md / 80;

@@ -16,7 +16,14 @@ public abstract class Order {
 
     protected void RemoveAnotherOrder(List<Unit> units) {
 
+        Player player = GameController.players[units[0].idPlayer];
         Unit unit = units[0];
+
+        FindAndAttackOrder FAO;
+        MovementOrder MO;
+        DefenseOrder DO;
+        AttackOrder AO;
+        BuildOrder BO;
 
         foreach (Order order in GameController.players[unit.idPlayer].orders) {
 
@@ -24,7 +31,7 @@ public abstract class Order {
 
                 if (!unit.isBusy && order.GetType() == typeof(MovementOrder)) {
 
-                    MovementOrder MO = (MovementOrder)order;
+                    MO = (MovementOrder)order;
 
                     if (MO.units.Contains(unit)) {
 
@@ -35,7 +42,7 @@ public abstract class Order {
                             }
 
                             if (MO.units.Count > 0) {
-                                GameController.players[unit.idPlayer].standbyOrders.Add(MO.Clone());
+                                player.standbyOrders.Add(MO.Clone());
                             }
                         }
 
@@ -48,7 +55,7 @@ public abstract class Order {
 
                     if (order.GetType().BaseType == typeof(AttackOrder)) {
 
-                        AttackOrder AO = (AttackOrder)order;
+                        AO = (AttackOrder)order;
 
                         if (AO.units.Contains(unit)) {
 
@@ -59,7 +66,7 @@ public abstract class Order {
                                 }
 
                                 if (AO.units.Count > 0) {
-                                    GameController.players[unit.idPlayer].standbyOrders.Add(AO.Clone());
+                                    player.standbyOrders.Add(AO.Clone());
                                 }
                             }
 
@@ -70,7 +77,7 @@ public abstract class Order {
 
                     } else if (order.GetType() == typeof(BuildOrder) && unit.GetType().BaseType == typeof(Worker)) {
 
-                        BuildOrder BO = (BuildOrder)order;
+                        BO = (BuildOrder)order;
                         
                         if (BO.workers.Contains((Worker)unit)) {
 
@@ -81,7 +88,7 @@ public abstract class Order {
                                 }
 
                                 if (BO.workers.Count > 0) {
-                                    GameController.players[unit.idPlayer].standbyOrders.Add(BO.Clone());
+                                    player.standbyOrders.Add(BO.Clone());
                                 }
                             }
 
@@ -91,7 +98,8 @@ public abstract class Order {
                         }
 
                     } else if(order.GetType() == typeof(DefenseOrder)) {
-                        DefenseOrder DO = (DefenseOrder)order;
+
+                        DO = (DefenseOrder)order;
 
                         if(DO.units.Contains(unit)) {
 
@@ -102,7 +110,7 @@ public abstract class Order {
                                 }
 
                                 if (DO.units.Count > 0) {
-                                    GameController.players[unit.idPlayer].standbyOrders.Add(DO.Clone());
+                                    player.standbyOrders.Add(DO.Clone());
                                 }
 
                             }
@@ -112,7 +120,7 @@ public abstract class Order {
                         }
 
                     } else if(order.GetType() == typeof(FindAndAttackOrder)) {
-                        FindAndAttackOrder FAO = (FindAndAttackOrder)order;
+                        FAO = (FindAndAttackOrder)order;
 
                         if (FAO.units.Contains(unit)) {
 
@@ -123,7 +131,7 @@ public abstract class Order {
                                 }
 
                                 if (FAO.units.Count > 0) {
-                                    GameController.players[unit.idPlayer].standbyOrders.Add(FAO.Clone());
+                                    player.standbyOrders.Add(FAO.Clone());
                                 }
 
                             }

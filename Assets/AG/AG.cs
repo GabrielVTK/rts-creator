@@ -139,7 +139,7 @@ public class AG : MonoBehaviour {
    
             cromossomo[0] = UnityEngine.Random.Range(0, 101);
             cromossomo[1] = UnityEngine.Random.Range(0, 101);
-            cromossomo[2] = UnityEngine.Random.Range(4, 101);
+            cromossomo[2] = UnityEngine.Random.Range(1, 11);
             cromossomo[3] = UnityEngine.Random.Range(100, 1001);
             cromossomo[4] = UnityEngine.Random.Range(0, 101);
             cromossomo[5] = UnityEngine.Random.Range(0, 101);
@@ -147,7 +147,7 @@ public class AG : MonoBehaviour {
             cromossomo[7] = UnityEngine.Random.Range(0, 101);
             cromossomo[8] = UnityEngine.Random.Range(0, 101);
             //cromossomo[9] = UnityEngine.Random.Range(10, 501);
-            cromossomo[9] = UnityEngine.Random.Range(10, 401); // Baixado de 500 para 400 devido ao limite populacional
+            cromossomo[9] = UnityEngine.Random.Range(10, 51); // Baixado de 500 para 400 devido ao limite populacional
 
             AG.populacao[i] = new IndividuoAG();
             AG.populacao[i].setCromossomo(cromossomo);

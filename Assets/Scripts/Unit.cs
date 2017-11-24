@@ -18,6 +18,8 @@ public class Unit : Property {
     public bool isBusy;
     public bool isWalking;
 	public bool isAttacked;
+
+    public Vector2 positionInitial;
     
 	public Unit(string name, Sprite icon, GameObject model, Dictionary<BaseMaterial, int> cost, float attack, float defense, float walkSpeed, float lifeTotal, float range, float attackSpeed, float developTime, int visionField) : base(name, icon, developTime) {
 		this.model = model;
@@ -113,7 +115,7 @@ public class Unit : Property {
     }
 
     public void Destroy() {
-        GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+        GameController gameController = GameController.instance.GetComponent<GameController>();
 
         GameController.players[this.idPlayer].population--;
         gameController.RemoveSelectedUnit(this);

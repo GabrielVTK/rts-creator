@@ -11,25 +11,30 @@ public class MovementOrder : Order {
 
     private MovementOrder() {}
 
-    public MovementOrder(int idPlayer, List<Unit> units, Vector2 destiny, bool rangeConsidered, bool checkAnotherOrder = true) {
+    public MovementOrder(int idPlayer, List<Unit> units, Vector2 destiny, bool rangeConsidered, bool checkAnotherOrder = true, bool setIsWalking = true) {
         this.idPlayer = idPlayer;
         this.units = new List<Unit>();
         this.destiny = destiny;
         this.timeCounter = 0;
         this.rangeConsidered = rangeConsidered;
-
-        foreach (Unit unit in units) {
-            unit.isWalking = true;
-            this.units.Add(unit);
-        }
-
+                
         if(units.Count == 0) {
             Debug.Log("Sem unidades para MovementOrder");
             this.isActive = false;
             return;
         }
 
-        if(checkAnotherOrder && (this.units[0].isWalking || this.units[0].isBusy)) {
+        if(units[0].position == destiny) {
+            this.isActive = setIsWalking;
+            return;
+        }
+
+        foreach (Unit unit in units) {
+            unit.isWalking = true;
+            this.units.Add(unit);
+        }
+
+        if (checkAnotherOrder && (this.units[0].isWalking || this.units[0].isBusy)) {
             RemoveAnotherOrder(this.units);
         }
         
@@ -49,11 +54,19 @@ public class MovementOrder : Order {
 
         if (!this.isActive || this.units.Count == 0 || this.movements.Count == 0) {
 
-            foreach (Unit unit in this.units) {
-                unit.isWalking = false;
-            }
+            Unit unit = units[0];
+            Player player = GameController.players[unit.idPlayer];
 
             this.isActive = false;
+            
+            foreach (Unit unitItem in this.units) {
+                unitItem.isWalking = false;
+            }        
+
+            if (!this.isActive && units.Count > 0 && unit.position != unit.positionInitial) {
+                player.standbyOrders.Add(new MovementOrder(this.idPlayer, units, unit.positionInitial, false, true, false));
+            }
+
             return true;
         }
 
@@ -69,31 +82,36 @@ public class MovementOrder : Order {
     public override void Execute() {
         
         Map map = GameController.map;
-        
-        bool walk = true, discovered = false;
 
-        foreach(Unit unit in this.units) {
-            if(!unit.Walk(this.movements[0])) {
+        bool walk = true;
+        Unit unit = this.units[0];
+        Player player = GameController.players[unit.idPlayer];
+        Vector2 positionOld = unit.position;
+
+        foreach(Unit unitItem in this.units) {
+            if(!unitItem.Walk(this.movements[0])) {
                 walk = false;
                 break;
             }
+            map.tiles[(int)positionOld.y, (int)positionOld.x].units.Remove(unitItem);
+            map.tiles[(int)this.movements[0].y, (int)this.movements[0].x].units.Add(unitItem);
         }
-
+        
         if(walk) {
 
-            int x, y;
-
-            for(x = (int)this.units[0].position.x - this.units[0].visionField; x <= (int)this.units[0].position.x + this.units[0].visionField; x++) {
-                for(y = (int)this.units[0].position.y - this.units[0].visionField; y <= (int)this.units[0].position.y + this.units[0].visionField; y++) {
+            int x, y, dist, visionField = unit.visionField;
+            
+            for (x = (int)unit.position.x - visionField; x <= (int)unit.position.x + visionField; x++) {
+                for(y = (int)unit.position.y - visionField; y <= (int)unit.position.y + visionField; y++) {
 
                     if (x >= 0 && x < map.width && y >= 0 && y < map.height) {
                         
-                        int dist = Mathf.Abs(x - (int)this.units[0].position.x) + Mathf.Abs(y - (int)this.units[0].position.y);
-
-                        if (GameController.players[this.units[0].idPlayer].fog.tiles[y, x].unknown && dist <= this.units[0].visionField) {
-                            GameController.players[this.units[0].idPlayer].fog.tiles[y, x].Destroy();
-                            discovered = true;
+                        dist = Mathf.Abs(x - (int)unit.position.x) + Mathf.Abs(y - (int)unit.position.y);
+                        
+                        if (player.fog.tiles[y, x].unknown && dist <= visionField) {
+                            player.fog.tiles[y, x].Destroy();
                         }
+                        
                     }
                 }
             }
@@ -103,14 +121,18 @@ public class MovementOrder : Order {
         if(this.movements.Count == 0) {
             this.isActive = false;
 
-            foreach(Unit unit in this.units) {
-                unit.isWalking = false;
+            foreach(Unit unitItem in this.units) {
+                unitItem.isWalking = false;
+            }
+
+            if (!this.isActive && units.Count > 0 && unit.position != unit.positionInitial) {
+                player.standbyOrders.Add(new MovementOrder(this.idPlayer, units, unit.positionInitial, false, true, false));
             }
 
             return;
         }
 
-        if (walk && !discovered) {
+        if (walk) {
             this.movements.RemoveAt(0);
         } else {
             this.NewPath();
@@ -132,5 +154,5 @@ public class MovementOrder : Order {
 
         return MO;
     }
-
+    
 }

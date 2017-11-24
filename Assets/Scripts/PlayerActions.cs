@@ -321,13 +321,16 @@ public class PlayerActions {
 
 		List<MaterialSource> materialSources = new List<MaterialSource>();
 
-		foreach(MapComponent mapComponent in GameController.map.mapComponents) {
+        MaterialSource ms;
+
+
+        foreach (MapComponent mapComponent in GameController.map.mapComponents) {
             
             if(mapComponent.GetType() == typeof(MaterialSource) &&
                mapComponent.name == sourceName &&
                !player.fog.tiles[(int)mapComponent.position.y, (int)mapComponent.position.x].unknown) {
 
-                MaterialSource ms = (MaterialSource)mapComponent;
+                ms = (MaterialSource)mapComponent;
 
                 if(ms.canBuild) {
                     materialSources.Add(ms);
@@ -476,9 +479,11 @@ public class PlayerActions {
 
         List<Unit> targets = new List<Unit>();
 
-        foreach(AttackOrder AO in this.player.enemyAttackOrders) {
+        AttackBuildingOrder ABO;
+
+        foreach (AttackOrder AO in this.player.enemyAttackOrders) {
             if(AO.GetType() == typeof(AttackBuildingOrder)) {
-                AttackBuildingOrder ABO = (AttackBuildingOrder)AO;
+                ABO = (AttackBuildingOrder)AO;
                 if(ABO.target == building) {
                     return ABO.units;
                 }
@@ -490,9 +495,11 @@ public class PlayerActions {
 
     public List<Unit> GetUnitsEnemyIsAttacking(Unit unit) {
 
+        AttackUnitOrder AUO;
+
         foreach (AttackOrder AO in this.player.enemyAttackOrders) {
             if (AO.GetType() == typeof(AttackUnitOrder)) {
-                AttackUnitOrder AUO = (AttackUnitOrder)AO;
+                AUO = (AttackUnitOrder)AO;
                 if (AUO.targets.Contains(unit)) {
                     return AUO.units;
                 }

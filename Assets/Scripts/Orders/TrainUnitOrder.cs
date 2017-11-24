@@ -26,7 +26,7 @@ public class TrainUnitOrder : Order {
         if(this.units.Count == 0) {
             this.isActive = false;
             this.building.trainUnitOrder = null;
-            GameObject.Find("GameController").GetComponent<GameController>().DrawInfoMaterials();
+            GameController.instance.GetComponent<GameController>().DrawInfoMaterials();
             return true;
         }
 
@@ -50,9 +50,11 @@ public class TrainUnitOrder : Order {
         }
 
         this.units[0].position = new Vector2(this.building.position.x - 1.0f, this.building.position.y - 1.0f);
+        this.units[0].positionInitial = this.units[0].position;
         this.units[0].Draw();
 
         this.player.units.Add(this.units[0].id, this.units[0]);
+        GameController.map.tiles[(int)this.units[0].position.y, (int)this.units[0].position.x].units.Add(this.units[0]);
 
         this.units.RemoveAt(0);
     }

@@ -17,7 +17,7 @@ public class FogTile {
         this.unknown = false;
         this.blockExploration.DecreaseCount();
 
-        if (model != null) {
+        if (this.model != null) {
             GameController.DestroyImmediate(this.model);
             this.model = null;
         }

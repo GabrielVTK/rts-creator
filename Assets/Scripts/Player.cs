@@ -28,8 +28,7 @@ public class Player {
     public List<Order> standbyOrders;
 
     public List<AttackOrder> enemyAttackOrders;
-
-
+    
     // Log
     public int unitsCount = 0;
     public int resourcesCount = 0;

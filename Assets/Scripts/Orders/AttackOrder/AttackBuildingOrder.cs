@@ -95,7 +95,7 @@ public class AttackBuildingOrder : AttackOrder {
 
         return true;
     }
-
+    
     public override void Execute() {
 
         if(this.units.Count == 0) {
@@ -128,7 +128,10 @@ public class AttackBuildingOrder : AttackOrder {
                     break;
                 }
             }
-                
+
+            if (!this.isActive && units.Count > 0 && units[0].position != units[0].positionInitial) {
+                GameController.players[this.idPlayer].standbyOrders.Add(new MovementOrder(this.idPlayer, units, units[0].positionInitial, false, true, false));
+            }
 
         } else {
 

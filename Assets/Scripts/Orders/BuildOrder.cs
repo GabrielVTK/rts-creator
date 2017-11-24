@@ -111,18 +111,24 @@ public class BuildOrder : Order {
                 this.isActive = false;
                 this.building.RemoveFog();
 
+                List<Unit> units = new List<Unit>();
                 foreach (Worker worker in this.workers) {
                     worker.isBusy = false;
+                    units.Add((Unit)worker);
+                }
+
+                if (!this.isActive && units.Count > 0 && units[0].position != units[0].positionInitial) {
+                    GameController.players[this.idPlayer].standbyOrders.Add(new MovementOrder(this.idPlayer, units, units[0].positionInitial, false, true, false));
                 }
 
                 if (this.building.producedMaterial != null) {
-                    GameController.players[this.building.idPlayer].standbyOrders.Add(new ProduceMaterialOrder(this.idPlayer, this.building));
+                    GameController.players[this.idPlayer].standbyOrders.Add(new ProduceMaterialOrder(this.idPlayer, this.building));
                 }
 
             }                
 
-            GameObject.Find("GameController").GetComponent<GameController>().DrawViewContent();
-            GameObject.Find("GameController").GetComponent<GameController>().DrawViewInfo();
+            GameController.instance.GetComponent<GameController>().DrawViewContent();
+            GameController.instance.GetComponent<GameController>().DrawViewInfo();
 
         } else {
             

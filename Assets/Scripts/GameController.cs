@@ -20,7 +20,8 @@ struct Params {
 };
 
 public class GameController : MonoBehaviour {
-    
+    public static GameController instance;
+
     public static Map map = new Map();
 	public static Player[] players;
 
@@ -66,7 +67,7 @@ public class GameController : MonoBehaviour {
 
     public ulong ciclos;
     public float counterTime;
-
+    
     void Start() {
 
         // Log
@@ -74,6 +75,8 @@ public class GameController : MonoBehaviour {
         this.counterTime = 0.0f;
         
         this.playGame = false;
+
+        GameController.instance = this;
 
         StartCoroutine(RunGame());
 	}
@@ -111,7 +114,7 @@ public class GameController : MonoBehaviour {
         
         players[0].AddBuilding(map, gameComponents.buildings[0], positionBase[0]);
         players[1].AddBuilding(map, gameComponents.buildings[0], positionBase[1]);
-
+        
         if (GameController.scriptP1 != null && GameController.scriptP2 != null) {
             players[0].scriptAttributes = scriptP1;
             players[1].scriptAttributes = scriptP2;
@@ -135,27 +138,50 @@ public class GameController : MonoBehaviour {
             File.WriteAllText(Application.dataPath + "/StreamingAssets/game" + PlayerPrefs.GetInt("GameCount") + "/geracao" + AG.numGeracao + "_rodada" + TorneioTabela.rodada + "_partida" + GameInitializer.rountCount + "_players.json", Json.SerializeToString<Params[]>(playersParams));
         } else {
 
-            players[0].scriptAttributes.AddAttribute("EARLYMEAT", 56.6474f);
-            players[0].scriptAttributes.AddAttribute("EARLYGOLD", 43.3526039f);
-            players[0].scriptAttributes.AddAttribute("WORKERS", 91);
-            players[0].scriptAttributes.AddAttribute("MATERIALPERMIN", 597);
-            players[0].scriptAttributes.AddAttribute("MIDMEAT", 51.4970055f);
-            players[0].scriptAttributes.AddAttribute("MIDGOLD", 48.5029945f);
-            players[0].scriptAttributes.AddAttribute("INFANTRY", 33.5f);
-            players[0].scriptAttributes.AddAttribute("ARCHER", 21.5f);
-            players[0].scriptAttributes.AddAttribute("CAVALRY", 45);
-            players[0].scriptAttributes.AddAttribute("TROOP", 27);
+            /** Trava em 9500 ciclos
+            players[0].scriptAttributes.AddAttribute("EARLYMEAT", 90.32258f);
+            players[0].scriptAttributes.AddAttribute("EARLYGOLD", 9.67742f);
+            players[0].scriptAttributes.AddAttribute("WORKERS", 69f);
+            players[0].scriptAttributes.AddAttribute("MATERIALPERMIN", 630f);
+            players[0].scriptAttributes.AddAttribute("MIDMEAT", 100f);
+            players[0].scriptAttributes.AddAttribute("MIDGOLD", 0f);
+            players[0].scriptAttributes.AddAttribute("INFANTRY", 67.05882f);
+            players[0].scriptAttributes.AddAttribute("ARCHER", 24.705883f);
+            players[0].scriptAttributes.AddAttribute("CAVALRY", 8.235294f);
+            players[0].scriptAttributes.AddAttribute("TROOP", 247f);
 
-            players[1].scriptAttributes.AddAttribute("EARLYMEAT", 42);
-            players[1].scriptAttributes.AddAttribute("EARLYGOLD", 58);
-            players[1].scriptAttributes.AddAttribute("WORKERS", 20);
-            players[1].scriptAttributes.AddAttribute("MATERIALPERMIN", 318);
-            players[1].scriptAttributes.AddAttribute("MIDMEAT", 27.0270271f);
-            players[1].scriptAttributes.AddAttribute("MIDGOLD", 72.97298f);
-            players[1].scriptAttributes.AddAttribute("INFANTRY", 3.053435f);
-            players[1].scriptAttributes.AddAttribute("ARCHER", 74.80916f);
-            players[1].scriptAttributes.AddAttribute("CAVALRY", 22.1374035f);
-            players[1].scriptAttributes.AddAttribute("TROOP", 364);
+            players[1].scriptAttributes.AddAttribute("EARLYMEAT", 61.98347f);
+            players[1].scriptAttributes.AddAttribute("EARLYGOLD", 38.01653f);
+            players[1].scriptAttributes.AddAttribute("WORKERS", 76f);
+            players[1].scriptAttributes.AddAttribute("MATERIALPERMIN", 696f);
+            players[1].scriptAttributes.AddAttribute("MIDMEAT", 23.5294113f);
+            players[1].scriptAttributes.AddAttribute("MIDGOLD", 76.47059f);
+            players[1].scriptAttributes.AddAttribute("INFANTRY", 29.8969059f);
+            players[1].scriptAttributes.AddAttribute("ARCHER", 31.9587612f);
+            players[1].scriptAttributes.AddAttribute("CAVALRY", 38.14433f);
+            players[1].scriptAttributes.AddAttribute("TROOP", 382f);
+            /**/
+            players[0].scriptAttributes.AddAttribute("EARLYMEAT", 11.2903223f);
+            players[0].scriptAttributes.AddAttribute("EARLYGOLD", 88.70968f);
+            players[0].scriptAttributes.AddAttribute("WORKERS", 5f);
+            players[0].scriptAttributes.AddAttribute("MATERIALPERMIN", 551f);
+            players[0].scriptAttributes.AddAttribute("MIDMEAT", 47.1428566f);
+            players[0].scriptAttributes.AddAttribute("MIDGOLD", 52.8571434f);
+            players[0].scriptAttributes.AddAttribute("INFANTRY", 26.3513527f);
+            players[0].scriptAttributes.AddAttribute("ARCHER", 28.37838f);
+            players[0].scriptAttributes.AddAttribute("CAVALRY", 45.27027f);
+            players[0].scriptAttributes.AddAttribute("TROOP", 49f);
+
+            players[1].scriptAttributes.AddAttribute("EARLYMEAT", 25f);
+            players[1].scriptAttributes.AddAttribute("EARLYGOLD", 75f);
+            players[1].scriptAttributes.AddAttribute("WORKERS", 9f);
+            players[1].scriptAttributes.AddAttribute("MATERIALPERMIN", 894f);
+            players[1].scriptAttributes.AddAttribute("MIDMEAT", 32.63158f);
+            players[1].scriptAttributes.AddAttribute("MIDGOLD", 67.36842f);
+            players[1].scriptAttributes.AddAttribute("INFANTRY", 52.63158f);
+            players[1].scriptAttributes.AddAttribute("ARCHER", 15.7894745f);
+            players[1].scriptAttributes.AddAttribute("CAVALRY", 31.578949f);
+            players[1].scriptAttributes.AddAttribute("TROOP", 21f);
 
         }
 
@@ -318,7 +344,7 @@ public class GameController : MonoBehaviour {
 
 	public void UpdateInfo() {
 
-		if(this.objectName != null) {
+		if(this.objectName != null && GameController.draw) {
 
 			string[] variables = this.objectName.Split ('_');
 

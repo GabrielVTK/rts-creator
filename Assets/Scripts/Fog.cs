@@ -16,16 +16,16 @@ public class Fog {
         this.blocks = new BlockExploration[Mathf.CeilToInt(GameController.map.height / 4.0f), Mathf.CeilToInt(GameController.map.width / 4.0f)];
         this.calculatePotential = true;
 
-        int i, j;
+        int i, j, iBlocks = this.blocks.GetLength(0), jBlocks = this.blocks.GetLength(1);
 
-        for(i = 0; i < this.blocks.GetLength(0); i++) {
-            for (j = 0; j < this.blocks.GetLength(1); j++) {
+        for(i = 0; i < iBlocks; i++) {
+            for (j = 0; j < jBlocks; j++) {
                 this.blocks[i, j] = new BlockExploration(this, i, j);
             }
         }
 
-        for (i = 0; i < this.tiles.GetLength(0); i++) {
-            for (j = 0; j < this.tiles.GetLength(1); j++) {
+        for (i = 0; i < GameController.map.height; i++) {
+            for (j = 0; j < GameController.map.width; j++) {
                 this.tiles[i, j] = new FogTile();
                 this.tiles[i, j].unknown = true;
                 this.tiles[i, j].blockExploration = this.blocks[(int)(i / 4), (int)(j / 4)];
@@ -35,11 +35,11 @@ public class Fog {
     }
     
     public void CalculateBlocksPotential() {
-        
-        int i, j;
-        
-        for (i = 0; i < this.blocks.GetLength(0); i++) {
-            for (j = 0; j < this.blocks.GetLength(1); j++) {
+
+        int i, j, iLimit = this.blocks.GetLength(0), jLimit = this.blocks.GetLength(1);
+
+        for (i = 0; i < iLimit; i++) {
+            for (j = 0; j < jLimit; j++) {
                 this.blocks[i, j].CalculatePotential();
             }
         }
@@ -49,12 +49,12 @@ public class Fog {
 
     public BlockExploration GetBetterBlockPotential() {
 
-        int counterTilesUnknow = 0, i, j;
+        int counterTilesUnknow = 0, i, j, iLimit = this.blocks.GetLength(0), jLimit = this.blocks.GetLength(1); ;
         BlockExploration bestBlock = null, blockMostUnknow = null;
         
         if(this.idPlayer == 0) {
-            for (i = 0; i < this.blocks.GetLength(0); i++) {
-                for (j = 0; j < this.blocks.GetLength(1); j++) {
+            for (i = 0; i < iLimit; i++) {
+                for (j = 0; j < jLimit; j++) {
                     this.blocks[i, j].CalculatePotential();
 
                     if (counterTilesUnknow < this.blocks[i, j].count) {
@@ -68,8 +68,8 @@ public class Fog {
                 }
             }
         } else {
-            for (i = this.blocks.GetLength(0) - 1; i >= 0; i--) {
-                for (j = this.blocks.GetLength(1) - 1; j >= 0; j--) {
+            for (i = iLimit - 1; i >= 0; i--) {
+                for (j = jLimit - 1; j >= 0; j--) {
                     this.blocks[i, j].CalculatePotential();
 
                     if (counterTilesUnknow < this.blocks[i, j].count) {

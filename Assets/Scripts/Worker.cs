@@ -31,74 +31,7 @@ public class Worker : Unit {
         this.materialType = null;
        //this.targetSource = null;
     }
-
-	/**public void CollectMaterial() {
-
-		if (this.materialType != null) {
-
-			if(this.targetSource != null) {
-
-				if(this.materialType != this.targetSource.baseMaterial) {
-                    
-					if (this.isWalking) { return; }
-
-					GameController.players [this.idPlayer - 1].baseMaterials [this.materialType] += this.capacity;
-					GameObject.Find ("GameController").GetComponent<GameController> ().DrawInfoMaterials ();
-
-					this.collectTimeCounter = 0;
-					this.capacity = 0;
-
-					this.materialType = this.targetSource.baseMaterial;
-				}
-			}
-
-			if (this.capacity >= this.capacityTotal || this.targetSource == null || this.targetSource.quantity == 0) {
-
-				if (this.isWalking) { return; }
-
-				GameController.players [this.idPlayer].baseMaterials [this.materialType] += this.capacity;
-				GameObject.Find ("GameController").GetComponent<GameController> ().DrawInfoMaterials ();
-
-				this.capacity = 0;
-
-				if (this.targetSource == null) {
-					this.materialType = null;
-					this.collectTimeCounter = 0;
-				} else if (this.targetSource.quantity == 0) {
-					this.targetSource = null;
-					this.materialType = null;
-					this.collectTimeCounter = 0;
-				}
-
-			} else {
-
-				if (this.isWalking) { return; }
-
-				if (this.collectTimeCounter < GameController.unitTime) {
-					this.collectTimeCounter += Time.deltaTime * collectSpeed;
-				} else {
-					this.targetSource.quantity--;
-					this.capacity++;
-					this.collectTimeCounter -= GameController.unitTime;
-				}
-
-				if (this.targetSource.quantity == 0) {
-					GameObject.Find ("GameController").GetComponent<GameController> ().DestroySource (this.targetSource);
-					this.targetSource = null;
-				}
-
-			}
-
-		} else  if(this.targetSource != null) {
-			this.materialType = this.targetSource.baseMaterial;
-		}
-
-	}/**/
-
-	/**public BaseMaterial ReturnMaterial(Building target) {
-		return materialType;
-	}/**/
-
+    
     public bool Build(Building building) {
 
         if(!building.constructed && building.life < building.lifeTotal) {
@@ -109,9 +42,9 @@ public class Worker : Unit {
                 building.constructed = true;
                 building.life = building.lifeTotal;
             }
-
-            GameObject.Find("GameController").GetComponent<GameController>().DrawViewInfo();
             
+            GameController.instance.DrawViewInfo();
+
             return true;
         }
         

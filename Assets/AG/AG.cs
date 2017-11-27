@@ -49,7 +49,7 @@ public class AG : MonoBehaviour {
 
         this.geracaoIni = AG.numGeracao;
 
-        Time.timeScale = 50;
+        Time.timeScale = 100;
         Debug.Log("TimeScale: " + Time.timeScale);
 
         StartCoroutine(CriaGeracoes(10000));

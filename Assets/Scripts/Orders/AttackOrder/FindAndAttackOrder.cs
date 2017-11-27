@@ -92,9 +92,9 @@ public class FindAndAttackOrder : Order {
                         List<Unit> targets = new List<Unit>();
                         targets.Add((Unit)property);
 
-                        this.AO = new AttackUnitOrder(this.units, targets, true);
+                        this.AO = new AttackUnitOrder(this.units, targets, true, true);
                     } else {
-                        this.AO = new AttackBuildingOrder(this.units, (Building)property);
+                        this.AO = new AttackBuildingOrder(this.units, (Building)property, true);
                     }
                 } else {
                     this.isActive = false;

@@ -7,14 +7,17 @@ public class AttackBuildingOrder : AttackOrder {
 
     public Building target;
     private Vector2 destiny;
+    private bool subOrder;
 
     private AttackBuildingOrder() : base(new List<Unit>()) {}
 
-	public AttackBuildingOrder(List<Unit> units, Building target) : base(units) {
+	public AttackBuildingOrder(List<Unit> units, Building target, bool subOrder = false) : base(units) {
         this.target = target;
         this.destiny = this.GetBestPosition();
+        this.subOrder = subOrder;
 
         if(units.Count == 0) {
+            Debug.Log("AttackBuildingOrder => nenhuma unidade");
             return;
         }
 
@@ -79,12 +82,25 @@ public class AttackBuildingOrder : AttackOrder {
 
     public override bool Cooldown() {
 
-        if (this.units.Count == 0) {
+        /**/
+        if (this.units.Count == 0 || this.target == null) {
             GameController.players[(this.idPlayer == 0 ? 1 : 0)].enemyAttackOrders.Remove(this);
             this.target.isAttacked = false;
             this.isActive = false;
             return true;
         }
+
+        if (!this.isActive) {
+            Debug.Log("AttackBuildingOrder desativada");
+
+            if (units.Count > 0 && units[0].position != units[0].positionInitial && !this.subOrder) {
+                Debug.Log("Volta para base");
+                //GameController.players[this.idPlayer].standbyOrders.Add(new MovementOrder(this.idPlayer, units, units[0].positionInitial, false, true, false));
+            }
+
+            return true;
+        }
+        /**/
 
         if (this.timeCounter >= GameController.newUnitTime) {
             this.timeCounter -= GameController.newUnitTime;
@@ -98,18 +114,9 @@ public class AttackBuildingOrder : AttackOrder {
     
     public override void Execute() {
 
-        if(this.units.Count == 0) {
-            GameController.players[(this.idPlayer == 0 ? 1 : 0)].enemyAttackOrders.Remove(this);
-            this.target.isAttacked = false;
-            this.isActive = false;
-            return;
-        }
-
-        if(!this.isActive) {
-            return;
-        }
-
         if(this.CheckDistance()) {
+
+            Debug.Log("Ataca building!!!");
 
             if(this.movementOrder != null) {
                 foreach (Unit unit in this.units) {
@@ -120,6 +127,12 @@ public class AttackBuildingOrder : AttackOrder {
             
             target.isAttacked = true;
 
+            if(this.needAlertAttack) {
+                Debug.Log("P" + this.idPlayer + ": unidade " + this.units[0].model.name + " ataca " + this.target.model.name);
+                this.needAlertAttack = false;
+                GameController.players[(this.idPlayer == 0 ? 1 : 0)].enemyAttackOrders.Add(this);
+            }
+
             foreach(Unit unit in this.units) {
                 if(!unit.Attack(target)) {
                     GameController.players[this.target.idPlayer].enemyAttackOrders.Remove(this);
@@ -129,14 +142,17 @@ public class AttackBuildingOrder : AttackOrder {
                 }
             }
 
-            if (!this.isActive && units.Count > 0 && units[0].position != units[0].positionInitial) {
+            if (!this.isActive && units.Count > 0 && units[0].position != units[0].positionInitial && !this.subOrder) {
+                Debug.Log("Volta para base depois de finalizar o ataque!");
                 GameController.players[this.idPlayer].standbyOrders.Add(new MovementOrder(this.idPlayer, units, units[0].positionInitial, false, true, false));
             }
 
         } else {
 
-            if(this.movementOrder == null) {
-                this.movementOrder = new MovementOrder(this.idPlayer, this.units, this.destiny, true, false);
+            Debug.Log("Anda ate building!!!");
+
+            if (this.movementOrder == null || this.movementOrder.movements.Count == 0) {
+                this.movementOrder = new MovementOrder(this.idPlayer, this.units, this.destiny, true, false, true, true);
             }
 
             if(!movementOrder.Cooldown()) {

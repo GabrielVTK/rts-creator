@@ -485,7 +485,11 @@ public class PlayerActions {
             if(AO.GetType() == typeof(AttackBuildingOrder)) {
                 ABO = (AttackBuildingOrder)AO;
                 if(ABO.target == building) {
-                    return ABO.units;
+                    if(ABO.units.Count > 0) {
+                        return ABO.units;
+                    } else {
+                        ABO.isActive = false;
+                    }
                 }
             }
         }

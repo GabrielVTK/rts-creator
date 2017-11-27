@@ -20,6 +20,7 @@ public class DefenseOrder : Order {
         this.isConcentrated = isConcentrated;
 
         if(building == null || units == null || units.Count == 0) {
+            Debug.Log("Ordem de defesa invalida!");
             this.isActive = false;
             return;
         }
@@ -28,10 +29,9 @@ public class DefenseOrder : Order {
             this.units.Add(unit);
         }
 
-        if (this.units[0].isWalking || this.units[0].isBusy) {
-            RemoveAnotherOrder(this.units);
-        }
-
+        Debug.Log("Defende " + this.building.name + "("+this.building.position+")");
+        
+        RemoveAnotherOrder(this.units);
     }
 
     private bool CheckDistance() {
@@ -72,7 +72,7 @@ public class DefenseOrder : Order {
 
     public override bool Cooldown() {
 
-        if (this.units.Count == 0) {
+        if (this.units.Count == 0 || this.building == null) {
             this.isActive = false;
             return true;
         }
@@ -82,17 +82,39 @@ public class DefenseOrder : Order {
 
     public override void Execute() {
 
-        if(building.isAttacked) {
+        /**/
+        if (building.isAttacked) {
+        /**/
+            Debug.Log("P"+this.idPlayer+": DefenseOrder: Ataca inimigos!");
             
-            if(this.AUO == null) {
-                this.AUO = new AttackUnitOrder(this.units, GameController.players[building.idPlayer].action.GetUnitsEnemyIsAttacking(this.building), this.isConcentrated);
+            if (this.AUO == null) {
+
+                Debug.Log("Nova ordem de ataque!");
+
+                List<Unit> targets = GameController.players[building.idPlayer].action.GetUnitsEnemyIsAttacking(this.building);
+
+                if (targets.Count > 0) {
+                    this.AUO = new AttackUnitOrder(this.units, targets, this.isConcentrated, true);
+                } else {
+                    Debug.Log("P" + this.idPlayer + ": DefenseOrder: Sem alvos!");
+                    this.isActive = false;
+                    return;
+                }
+                
             }
 
             if(!this.AUO.Cooldown()) {
                 this.AUO.Execute();
             }
             
+            if(!this.AUO.isActive) {
+                Debug.Log("P" + this.idPlayer + ": DefenseOrder: Desativa ordem!");
+                this.isActive = false;
+            }
+        /**/
         } else {
+
+            Debug.Log("DefenseOrder: protege building!");
 
             this.AUO = null;
 
@@ -108,7 +130,7 @@ public class DefenseOrder : Order {
             } else {
 
                 if (this.MO == null){
-                    this.MO = new MovementOrder(this.idPlayer, this.units, this.building.position, false, false);
+                    this.MO = new MovementOrder(this.idPlayer, this.units, this.building.position, false, false, true, true);
                 }
 
                 if (!this.MO.Cooldown()) {
@@ -118,6 +140,7 @@ public class DefenseOrder : Order {
             }
             
         }
+        /**/
 
     }
 

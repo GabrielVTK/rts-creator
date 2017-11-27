@@ -70,6 +70,8 @@ public abstract class Order {
                                 }
                             }
 
+                            //Debug.Log("Remove AO");
+                            GameController.players[(this.idPlayer == 0 ? 1 : 0)].enemyAttackOrders.Remove(AO);
                             AO.isActive = false;
 
                             break;
@@ -101,9 +103,32 @@ public abstract class Order {
 
                         DO = (DefenseOrder)order;
 
+                        if(this.GetType() == typeof(DefenseOrder)) {
+                            DefenseOrder DefenseOrderOld = (DefenseOrder)this;
+
+                            if (DO.units.Contains(unit)) {
+
+                                if (DO.units.Count == units.Count && DO.building != DefenseOrderOld.building) {
+
+                                    foreach (Unit unitItem in units) {
+                                        DO.units.Remove(unitItem);
+                                    }
+
+                                    if (DO.units.Count > 0) {
+                                        player.standbyOrders.Add(DO.Clone());
+                                    }
+
+                                    DO.isActive = false;
+                                }
+
+                                break;
+                            }
+
+                        }
+                        
                         if(DO.units.Contains(unit)) {
 
-                            if(DO.units.Count == units.Count) {
+                            if(DO.units.Count != units.Count) {
 
                                 foreach (Unit unitItem in units) {
                                     DO.units.Remove(unitItem);
@@ -112,10 +137,11 @@ public abstract class Order {
                                 if (DO.units.Count > 0) {
                                     player.standbyOrders.Add(DO.Clone());
                                 }
-
+                                
                             }
 
                             DO.isActive = false;
+
                             break;
                         }
 
@@ -124,7 +150,7 @@ public abstract class Order {
 
                         if (FAO.units.Contains(unit)) {
 
-                            if (FAO.units.Count == units.Count) {
+                            if (FAO.units.Count != units.Count) {
 
                                 foreach (Worker unitItem in units) {
                                     FAO.units.Remove(unitItem);

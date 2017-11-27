@@ -208,7 +208,8 @@ public class Player {
             if(order.GetType().BaseType == typeof(AttackOrder)) {
 
                 AttackOrder AO = (AttackOrder)order;
-                
+
+                //Debug.Log("P"+this.id + ": remove ordem de ataque do player " + (this.id == 0 ? 1 : 0));
                 GameController.players[(this.id == 0 ? 1 : 0)].enemyAttackOrders.Remove((AttackOrder)order);
             }
         }

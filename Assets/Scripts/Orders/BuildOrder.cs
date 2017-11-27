@@ -23,24 +23,21 @@ public class BuildOrder : Order {
         }
 
         if (this.workers.Count == 0 || building == null) {
+            Debug.Log("BuildOrder desativada por falta de trabalhador ou building inexistente.");
             this.isActive = false;
             return;
-        }
-
-        if (this.workers[0].isWalking || this.workers[0].isBusy) {
-            List<Unit> units = new List<Unit>();
-            foreach(Unit unit in this.workers) {
-                units.Add(unit);
-            }
-            
-            RemoveAnotherOrder(units);
-            
         }
         
         foreach (Worker worker in this.workers) {
             worker.isBusy = true;
         }
 
+        List<Unit> units = new List<Unit>();
+        foreach (Unit unit in this.workers) {
+            units.Add(unit);
+        }
+
+        RemoveAnotherOrder(units);
     }
 
     private bool CheckDistance() {
@@ -94,7 +91,9 @@ public class BuildOrder : Order {
 
         if(this.CheckDistance()) {
 
-            if(this.movementOrder != null) {
+            //Debug.Log("P" + this.idPlayer + ": Constroi building");
+
+            if (this.movementOrder != null) {
                 foreach(Worker worker in this.workers) {
                     worker.isWalking = false;
                 }
@@ -131,8 +130,12 @@ public class BuildOrder : Order {
             GameController.instance.GetComponent<GameController>().DrawViewInfo();
 
         } else {
-            
-            if(this.movementOrder == null) {
+
+            //Debug.Log("P"+this.idPlayer+": Move ate building");
+
+            if(this.movementOrder == null || this.movementOrder.movements.Count == 0) {
+
+                //Debug.Log("P" + this.idPlayer + ": Nova Order de movimento!");
 
                 List<Unit> units = new List<Unit>();
 
@@ -140,10 +143,12 @@ public class BuildOrder : Order {
                     units.Add(worker);
                 }
 
-                this.movementOrder = new MovementOrder(this.idPlayer, units, building.position, true, false);
-            }
+                this.movementOrder = new MovementOrder(this.idPlayer, units, building.position, true, false, true, true);
+            } 
 
-            this.movementOrder.Execute();
+            if (!this.movementOrder.Cooldown()) {
+                this.movementOrder.Execute();
+            }
         }
 
     }

@@ -8,8 +8,11 @@ public abstract class AttackOrder : Order {
     public List<Unit> units;
     public MovementOrder movementOrder;
 
+    protected bool needAlertAttack;
+
     protected AttackOrder(List<Unit> units) {
-       
+        this.needAlertAttack = true;
+
         if(units.Count == 0) {
             this.isActive = false;
             return;
@@ -24,11 +27,7 @@ public abstract class AttackOrder : Order {
             this.units.Add(unit);
         }
 
-        if (this.units[0].isWalking || this.units[0].isBusy) {
-            RemoveAnotherOrder(this.units);
-        }
-
-        GameController.players[(this.units[0].id == 0 ? 1 : 0)].enemyAttackOrders.Add(this);
+        RemoveAnotherOrder(this.units);
     }
    
     public abstract Order Clone();

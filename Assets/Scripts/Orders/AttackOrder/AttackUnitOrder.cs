@@ -8,19 +8,23 @@ public class AttackUnitOrder : AttackOrder {
     public List<Unit> targets;
     private bool isConcentrated;
     private int targetIndex;
+    private bool subOrder;
 
     private AttackUnitOrder() : base(new List<Unit>()) {}
 
-    public AttackUnitOrder(List<Unit> units, List<Unit> targets, bool isConcentrated) : base(units) {
+    public AttackUnitOrder(List<Unit> units, List<Unit> targets, bool isConcentrated, bool subOrder = false) : base(units) {
         this.targets = new List<Unit>();
         this.isConcentrated = isConcentrated;
         this.targetIndex = -1;
-        
+        this.subOrder = subOrder;
+
         foreach (Unit target in targets) {
             this.targets.Add(target);
         }
 
         if(units.Count == 0 || targets.Count == 0) {
+            Debug.Log("P"+this.idPlayer+": Ordem invalida! Unidades: " + units.Count + " || " + "Alvos: " + targets.Count);
+            this.isActive = false;
             return;
         }
 
@@ -30,7 +34,7 @@ public class AttackUnitOrder : AttackOrder {
     private bool CheckDistance() {
 
         if (this.targets.Count == 0){
-            GameController.players[(this.units[0].idPlayer == 0 ? 1 : 0)].enemyAttackOrders.Remove(this);
+            GameController.players[(this.idPlayer == 0 ? 1 : 0)].enemyAttackOrders.Remove(this);
             this.isActive = false;
             return false;
         }
@@ -81,6 +85,10 @@ public class AttackUnitOrder : AttackOrder {
 
     public override bool Cooldown() {
 
+        if (!this.isActive) {
+            return true;
+        }
+
         if (this.units.Count == 0 || this.targets.Count == 0) {
             GameController.players[(this.idPlayer == 0 ? 1 : 0)].enemyAttackOrders.Remove(this);
             this.isActive = false;
@@ -89,8 +97,8 @@ public class AttackUnitOrder : AttackOrder {
                 unit.isAttacked = false;
             }
 
-            if (!this.isActive && units.Count > 0 && units[0].position != units[0].positionInitial) {
-                GameController.players[this.idPlayer].standbyOrders.Add(new MovementOrder(this.idPlayer, units, units[0].positionInitial, false, true, false));
+            if (!this.isActive && units.Count > 0 && units[0].position != units[0].positionInitial && !this.subOrder) {
+                //GameController.players[this.idPlayer].standbyOrders.Add(new MovementOrder(this.idPlayer, units, units[0].positionInitial, false, true, false));
             }
 
             return true;
@@ -107,11 +115,7 @@ public class AttackUnitOrder : AttackOrder {
     }
 
     public override void Execute() {
-
-        if (!this.isActive) {
-            return;
-        }
-
+        
         if(this.CheckDistance()) {
 
             if(this.movementOrder != null) {
@@ -123,12 +127,17 @@ public class AttackUnitOrder : AttackOrder {
 
             Unit target;
 
-            foreach(Unit unit in this.units) {
+            if (this.needAlertAttack) {
+                this.needAlertAttack = false;
+                GameController.players[(this.idPlayer == 0 ? 1 : 0)].enemyAttackOrders.Add(this);
+            }
+
+            foreach (Unit unit in this.units) {
 
                 target = this.GetTarget();
 
                 if(target == null) {
-                    GameController.players[(this.units[0].idPlayer == 0 ? 1 : 0)].enemyAttackOrders.Remove(this);
+                    GameController.players[(this.idPlayer == 0 ? 1 : 0)].enemyAttackOrders.Remove(this);
                     this.isActive = false;
                     break;
                 }
@@ -151,14 +160,18 @@ public class AttackUnitOrder : AttackOrder {
 
             }
 
-            if (!this.isActive && units.Count > 0 && units[0].position != units[0].positionInitial) {
+            if (!this.isActive && units.Count > 0 && units[0].position != units[0].positionInitial && !this.subOrder) {
                 GameController.players[this.idPlayer].standbyOrders.Add(new MovementOrder(this.idPlayer, units, units[0].positionInitial, false, true, false));
             }
 
         } else {
+
+            if(!this.isActive) {
+                return;
+            }
             
             if(this.movementOrder == null || this.movementOrder.destiny != this.targets[0].position) {
-                this.movementOrder = new MovementOrder(this.idPlayer, this.units, targets[0].position, true, false);
+                this.movementOrder = new MovementOrder(this.idPlayer, this.units, targets[0].position, true, false, true, true);
             }
 
             if(!this.movementOrder.Cooldown()) {

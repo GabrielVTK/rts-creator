@@ -5,18 +5,21 @@ using UnityEngine;
 public class MovementOrder : Order {
 
     public List<Unit> units;
-    private List<Vector2> movements;
+    public List<Vector2> movements;
     public Vector2 destiny;
     private bool rangeConsidered;
+    private bool subOrder;
 
     private MovementOrder() {}
 
-    public MovementOrder(int idPlayer, List<Unit> units, Vector2 destiny, bool rangeConsidered, bool checkAnotherOrder = true, bool setIsWalking = true) {
+    public MovementOrder(int idPlayer, List<Unit> units, Vector2 destiny, bool rangeConsidered, bool checkAnotherOrder = true, bool setIsWalking = true, bool subOrder = false) {
         this.idPlayer = idPlayer;
         this.units = new List<Unit>();
+        this.movements = new List<Vector2>();
         this.destiny = destiny;
         this.timeCounter = 0;
         this.rangeConsidered = rangeConsidered;
+        this.subOrder = subOrder;
                 
         if(units.Count == 0) {
             Debug.Log("Sem unidades para MovementOrder");
@@ -25,16 +28,17 @@ public class MovementOrder : Order {
         }
 
         if(units[0].position == destiny) {
-            this.isActive = setIsWalking;
+            Debug.Log("Destino = posição atual");
+            this.isActive = false;
             return;
         }
 
         foreach (Unit unit in units) {
-            unit.isWalking = true;
+            unit.isWalking = setIsWalking;
             this.units.Add(unit);
         }
 
-        if (checkAnotherOrder && (this.units[0].isWalking || this.units[0].isBusy)) {
+        if (checkAnotherOrder) {
             RemoveAnotherOrder(this.units);
         }
         
@@ -52,23 +56,46 @@ public class MovementOrder : Order {
 
     public override bool Cooldown() {
 
-        if (!this.isActive || this.units.Count == 0 || this.movements.Count == 0) {
-
-            Unit unit = units[0];
-            Player player = GameController.players[unit.idPlayer];
-
+        if (this.movements.Count == 0) {
             this.isActive = false;
-            
+
             foreach (Unit unitItem in this.units) {
                 unitItem.isWalking = false;
-            }        
+            }
 
-            if (!this.isActive && units.Count > 0 && unit.position != unit.positionInitial) {
-                player.standbyOrders.Add(new MovementOrder(this.idPlayer, units, unit.positionInitial, false, true, false));
+            if(this.units.Count > 0) {
+                //Debug.Log("Retorna para base!");
+                GameController.players[this.idPlayer].standbyOrders.Add(new MovementOrder(this.idPlayer, units, units[0].positionInitial, false, true, false));
             }
 
             return true;
         }
+
+        if(this.units.Count == 0) {
+            this.isActive = false;
+            return true;
+        }
+        /**
+        if (!this.isActive || this.units.Count == 0 || this.movements.Count == 0) {
+            //Debug.Log("Finaliza MovementOrder(" + this.isActive + ", " + this.units.Count + ", " + this.movements.Count +")");
+
+            Unit unit = null;
+            Player player = GameController.players[this.idPlayer];
+
+            this.isActive = false;
+            
+            foreach (Unit unitItem in this.units) {
+                unit = unitItem;
+                unitItem.isWalking = false;
+            }        
+
+            if (!this.isActive && units.Count > 0 && unit.position != unit.positionInitial && !this.subOrder) {
+                
+            }
+
+            return true;
+        }
+        /**/
 
         if (this.timeCounter >= GameController.newUnitTime) {
             this.timeCounter -= GameController.newUnitTime;
@@ -80,7 +107,12 @@ public class MovementOrder : Order {
     }
 
     public override void Execute() {
-        
+
+        if (this.movements.Count == 0 || this.units.Count == 0) {
+            this.isActive = false;
+            return;
+        }
+
         Map map = GameController.map;
 
         bool walk = true;
@@ -119,13 +151,15 @@ public class MovementOrder : Order {
         }
 
         if(this.movements.Count == 0) {
+            Debug.Log("Sem movimentos.");
             this.isActive = false;
 
             foreach(Unit unitItem in this.units) {
                 unitItem.isWalking = false;
             }
 
-            if (!this.isActive && units.Count > 0 && unit.position != unit.positionInitial) {
+            if (!this.isActive && units.Count > 0 && unit.position != unit.positionInitial && !this.subOrder) {
+                Debug.Log("Volta para base.");
                 player.standbyOrders.Add(new MovementOrder(this.idPlayer, units, unit.positionInitial, false, true, false));
             }
 
@@ -135,6 +169,7 @@ public class MovementOrder : Order {
         if (walk) {
             this.movements.RemoveAt(0);
         } else {
+            Debug.Log("Refaz caminho");
             this.NewPath();
         }
 

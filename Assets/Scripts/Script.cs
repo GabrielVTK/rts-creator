@@ -74,18 +74,35 @@ public class Script {
         if(player.action.VerifyBuildingsIsAttacked()) {
 
             this.ShowMessage("Está sendo atacado!");
+            
+            List<Unit> units = new List<Unit>();
 
             // Tem Tropa?
-            if(player.action.GetAmountTroop() > 0) {
+            if (player.action.GetAmountTroop() > 0) {
                 this.ShowMessage("Defende com tropa!");
-                player.action.DefenseBuilding(player.action.GetTroop(), player.action.GetBuildingsAttacked()[0], true);
+
+                List<Unit> troop = player.action.GetTroop();
+
+                for (int i = 0; i < troop.Count / 2; i++) {
+                    units.Add(troop[i]);
+                }
+                
             } else if(player.action.GetAmountUnit("Worker") > 0) {
                 this.ShowMessage("Defende com trabalhadores!");
-                player.action.DefenseBuilding(player.action.GetUnits("Worker"), player.action.GetBuildingsAttacked()[0], true);
+
+                List<Unit> workers = player.action.GetUnits("Worker");
+
+                for (int i = 0; i < workers.Count / 2; i++) {
+                    units.Add(workers[i]);
+                }
+                
             } else {
+                this.ShowMessage("Continua o fluxograma!");
                 // Cria tropa
                 return false; // Continua o fluxograma
             }
+
+            player.action.DefenseBuilding(units, player.action.GetBuildingsAttacked()[0], true);
 
             return true;
         }
@@ -333,7 +350,7 @@ public class Script {
     private void ShowMessage(string message) {
         if (this.showDebug) {
             if(messageTimeCounter >= 1) {
-                Debug.Log(this.player.name + ": " + message);
+                Debug.Log(this.player.name + ": " + message); 
                 messageTimeCounter -= 1;
             } else {
                 this.messageTimeCounter += Time.deltaTime;

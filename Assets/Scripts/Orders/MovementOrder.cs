@@ -28,7 +28,6 @@ public class MovementOrder : Order {
         }
 
         if(units[0].position == destiny) {
-            Debug.Log("Destino = posição atual");
             this.isActive = false;
             return;
         }
@@ -169,7 +168,6 @@ public class MovementOrder : Order {
         if (walk) {
             this.movements.RemoveAt(0);
         } else {
-            Debug.Log("Refaz caminho");
             this.NewPath();
         }
 

@@ -28,8 +28,6 @@ public class DefenseOrder : Order {
         foreach (Unit unit in units) {
             this.units.Add(unit);
         }
-
-        Debug.Log("Defende " + this.building.name + "("+this.building.position+")");
         
         RemoveAnotherOrder(this.units);
     }
@@ -85,18 +83,14 @@ public class DefenseOrder : Order {
         /**/
         if (building.isAttacked) {
         /**/
-            Debug.Log("P"+this.idPlayer+": DefenseOrder: Ataca inimigos!");
-            
-            if (this.AUO == null) {
 
-                Debug.Log("Nova ordem de ataque!");
+            if (this.AUO == null) {
 
                 List<Unit> targets = GameController.players[building.idPlayer].action.GetUnitsEnemyIsAttacking(this.building);
 
                 if (targets.Count > 0) {
                     this.AUO = new AttackUnitOrder(this.units, targets, this.isConcentrated, true);
                 } else {
-                    Debug.Log("P" + this.idPlayer + ": DefenseOrder: Sem alvos!");
                     this.isActive = false;
                     return;
                 }
@@ -108,13 +102,10 @@ public class DefenseOrder : Order {
             }
             
             if(!this.AUO.isActive) {
-                Debug.Log("P" + this.idPlayer + ": DefenseOrder: Desativa ordem!");
                 this.isActive = false;
             }
         /**/
         } else {
-
-            Debug.Log("DefenseOrder: protege building!");
 
             this.AUO = null;
 

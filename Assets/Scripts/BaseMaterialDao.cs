@@ -4,19 +4,21 @@ using UnityEngine;
 
 public class BaseMaterialDao {
 
-	public string name;
+    public static int ID = 0;
+
+    public int id;
+    public string name;
 	public string icon;
 
 	public BaseMaterialDao() {}
 
 	public BaseMaterialDao(string name, string icon) {
-		this.name = name;
+        this.id = BaseMaterialDao.ID++;
+        this.name = name;
 		this.icon = icon;
 	}
 
 	public BaseMaterial Instantiate() {
-		BaseMaterial.InstantiateBaseMaterial(name, Resources.Load (icon, typeof(Sprite)) as Sprite);
-
-		return BaseMaterial.GetInstance(name);
-	}
+		return BaseMaterial.InstantiateBaseMaterial(id, name, Resources.Load(icon, typeof(Sprite)) as Sprite);
+    }
 }

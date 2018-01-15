@@ -38,18 +38,18 @@ public class AG : MonoBehaviour {
 
 
         if ((args.Length == 5 && args[4].Equals("production")) || args.Length == 1) {
-            AG.populacao = new IndividuoAG[8];
+            AG.populacao = new IndividuoAG[16];
         } else { 
             AG.populacao = new IndividuoAG[Int32.Parse(args[1])];
         }
         
         inicializaPopulacao();  //Geração 0
-
+        
         AG.numGeracao = 0;
 
         this.geracaoIni = AG.numGeracao;
 
-        Time.timeScale = 100;
+        Time.timeScale = 50;
         Debug.Log("TimeScale: " + Time.timeScale);
 
         StartCoroutine(CriaGeracoes(10000));
@@ -133,21 +133,26 @@ public class AG : MonoBehaviour {
 
         int i;
 
-        for (i = 0; i < AG.populacao.Length; i++) {
+        Debug.Log("Tamanho população: " + AG.populacao.Length);
+
+        adicionaIndividuos();
+
+        for (i = 16; i < AG.populacao.Length; i++) {
+
+            Debug.Log("Cria individuo");
 
             float[] cromossomo = new float[10];
    
             cromossomo[0] = UnityEngine.Random.Range(0, 101);
             cromossomo[1] = UnityEngine.Random.Range(0, 101);
-            cromossomo[2] = UnityEngine.Random.Range(1, 11);
+            cromossomo[2] = UnityEngine.Random.Range(3, 51);
             cromossomo[3] = UnityEngine.Random.Range(100, 1001);
             cromossomo[4] = UnityEngine.Random.Range(0, 101);
             cromossomo[5] = UnityEngine.Random.Range(0, 101);
             cromossomo[6] = UnityEngine.Random.Range(0, 101);
             cromossomo[7] = UnityEngine.Random.Range(0, 101);
             cromossomo[8] = UnityEngine.Random.Range(0, 101);
-            //cromossomo[9] = UnityEngine.Random.Range(10, 501);
-            cromossomo[9] = UnityEngine.Random.Range(10, 51); // Baixado de 500 para 400 devido ao limite populacional
+            cromossomo[9] = UnityEngine.Random.Range(10, 151);
 
             AG.populacao[i] = new IndividuoAG();
             AG.populacao[i].setCromossomo(cromossomo);
@@ -158,16 +163,18 @@ public class AG : MonoBehaviour {
     }    
 
     public IEnumerator selecaoPais(IndividuoAG[] pais) {
-        
+
         //calcula a aptidão dos indivíduos através do torneio no formato suiço
-        TorneioTabela torneio = new TorneioTabela(AG.populacao);
+        TorneioTabelaLiga torneio = new TorneioTabelaLiga();
 
         //inicializa pontuacao
         torneio.iniciaPontuacao();
 
         Debug.Log("StartCoroutine");
-        Debug.Log("Rodadas: "+ (int)Mathf.Ceil(Mathf.Log(AG.populacao.Length, 2)));
-        StartCoroutine(torneio.DivideJogadas((int)Mathf.Ceil(Mathf.Log(AG.populacao.Length, 2))));
+        Debug.Log("Rodadas: "+ (AG.populacao.Length - 1));
+        StartCoroutine(torneio.DivideJogadas(AG.populacao.Length - 1));
+
+        int i;
         
         while(AG.divideJogagas) {
             yield return null;
@@ -178,11 +185,23 @@ public class AG : MonoBehaviour {
         //após todos os jogadores terem suas pontuações do torneio suiço
         //calcula a pontuação total e "roda a roleta"
 
-        int i;
+        
         float pontuacaoTotal = 0f;
 
         for (i = 0; i < AG.populacao.Length; i++){
             pontuacaoTotal += AG.populacao[i].getPontuacao();
+        }
+
+        IndividuoAG ind;
+
+        Debug.Log(" -- Resultado -- ");
+        for (i = 0; i < AG.populacao.Length; i++) {
+            ind = AG.populacao[i];
+            Debug.Log("Player " + i + " -> " + ind.getPontuacao() + " pontos.");
+            Debug.Log("Inimigos");
+            foreach (int op in ind.getOponentes()) {
+                Debug.Log(" - " + op);
+            }
         }
 
         //IndividuoAG[] pai = new IndividuoAG[populacao.Length/2];
@@ -274,28 +293,41 @@ public class AG : MonoBehaviour {
 
         for(i = 0; i < AG.populacao.Length; i++) {
 
-            //   Chance de aplicar mutação de 2% para cada indivíduo da população
-            if (UnityEngine.Random.Range(0, 101) < 3) {
+            for(int g = 0; g < 10; g++) {
 
-                teste = true;
+                //   Chance de aplicar mutação de 2% para cada indivíduo da população
+                if (UnityEngine.Random.Range(0, 101) < 3) {
 
-                //Mutação ocorrerá de forma a alterar o gene aleatório do cromossomo escolhido
-                cromossomo = AG.populacao[i].getCromossomos();
-                cromossomoEscolhido = UnityEngine.Random.Range(0, 10);
+                    teste = true;
 
-                //Aplicando um valor maior ou menor de -10 a 10  (caso negativo transforma o valor em zero)
-                valor = UnityEngine.Random.Range(-10, 11);
-                if ((cromossomo[cromossomoEscolhido] + valor) <= 0) {
-                    cromossomo[cromossomoEscolhido] = 0;
-                } else {
+                    //Mutação ocorrerá de forma a alterar o gene aleatório do cromossomo escolhido
+                    cromossomo = AG.populacao[i].getCromossomos();
+                    cromossomoEscolhido = g;
 
-                    //soma o valor positivo ou negativo ao gene do cromossomo
-                    cromossomo[cromossomoEscolhido] = (cromossomo[cromossomoEscolhido] + valor);
+                    //Aplicando um valor maior ou menor de -10 a 10  (caso negativo transforma o valor em zero)
+
+                    switch (cromossomoEscolhido) {
+                        case 2:
+                            valor = UnityEngine.Random.Range(3, 51);
+                            break;
+                        case 3:
+                            valor = UnityEngine.Random.Range(100, 1001);
+                            break;
+                        case 9:
+                            valor = UnityEngine.Random.Range(10, 151);
+                            break;
+                        default:
+                            valor = UnityEngine.Random.Range(0, 101);
+                            break;
+                    }
+
+                    cromossomo[cromossomoEscolhido] = valor;
+                    //atualiza população
+                    AG.populacao[i].setCromossomo(cromossomo);
                 }
 
-                //atualiza população
-                AG.populacao[i].setCromossomo(cromossomo);
             }
+            
         }
 
         //se houve mutação, então normaliza novamente os valores;
@@ -358,6 +390,288 @@ public class AG : MonoBehaviour {
         }
 
         File.WriteAllText(Application.dataPath + "/StreamingAssets/game" + PlayerPrefs.GetInt("GameCount") + "/geracao" + geracao + ".json", Json.SerializeToString<Params[]>(popParams));
+    }
+
+    private void adicionaIndividuos() {
+        float[] cromossomo;
+
+        //População 16 => Geração 313
+            // Individuo 0 (15.2999992)
+            cromossomo = new float[10];
+            cromossomo[0] = 73.00305f;
+            cromossomo[1] = 26.9969521f;
+            cromossomo[2] = 31.2349644f;
+            cromossomo[3] = 707.428833f;
+            cromossomo[4] = 52.9034042f;
+            cromossomo[5] = 47.0965958f;
+            cromossomo[6] = 47.9906158f;
+            cromossomo[7] = 7.0988636f;
+            cromossomo[8] = 44.91052f;
+            cromossomo[9] = 40.849575f;
+            AG.populacao[0] = new IndividuoAG();
+            AG.populacao[0].descricao = "Individuo 0 da Geração 313 - População 16 (3% mutação)";
+            AG.populacao[0].setCromossomo(cromossomo);
+            AG.populacao[0].setGeracao(0);
+
+            // Individuo 1 (12.000001)
+            cromossomo = new float[10];
+            cromossomo[0] = 73.27227f;
+            cromossomo[1] = 26.7277317f;
+            cromossomo[2] = 31.2349644f;
+            cromossomo[3] = 707.428833f;
+            cromossomo[4] = 52.9034042f;
+            cromossomo[5] = 47.0965958f;
+            cromossomo[6] = 47.990593f;
+            cromossomo[7] = 7.09891033f;
+            cromossomo[8] = 44.9104958f;
+            cromossomo[9] = 40.849575f;
+            AG.populacao[1] = new IndividuoAG();
+            AG.populacao[1].descricao = "Individuo 1 da Geração 313 - População 16 (3% mutação)";
+            AG.populacao[1].setCromossomo(cromossomo);
+            AG.populacao[1].setGeracao(0);
+
+        //População 16(6 % mutação) => Geração 292
+            // Individuo 15 (15.2999992)
+            cromossomo = new float[10];
+            cromossomo[0] = 41.12878f;
+            cromossomo[1] = 58.87122f;
+            cromossomo[2] = 31.6382656f;
+            cromossomo[3] = 548.054f;
+            cromossomo[4] = 73.21813f;
+            cromossomo[5] = 26.7818737f;
+            cromossomo[6] = 24.905159f;
+            cromossomo[7] = 34.2094f;
+            cromossomo[8] = 40.88544f;
+            cromossomo[9] = 91.67584f;
+            AG.populacao[2] = new IndividuoAG();
+            AG.populacao[2].descricao = "Individuo 15 da Geração 292 - População 16 (6% mutação)";
+            AG.populacao[2].setCromossomo(cromossomo);
+            AG.populacao[2].setGeracao(0);
+
+            // Individuo 11 (12.3)
+            cromossomo = new float[10];
+            cromossomo[0] = 41.1283035f;
+            cromossomo[1] = 58.8716965f;
+            cromossomo[2] = 31.6382656f;
+            cromossomo[3] = 547.9157f;
+            cromossomo[4] = 73.21807f;
+            cromossomo[5] = 26.7819328f;
+            cromossomo[6] = 24.90525f;
+            cromossomo[7] = 34.209156f;
+            cromossomo[8] = 40.88559f;
+            cromossomo[9] = 91.67577f;
+            AG.populacao[3] = new IndividuoAG();
+            AG.populacao[3].descricao = "Individuo 11 da Geração 292 - População 16 (6% mutação)";
+            AG.populacao[3].setCromossomo(cromossomo);
+            AG.populacao[3].setGeracao(0);
+
+        //População 16(Mutação modificada) => Geração 127
+            // Individuo 11 (14.999999)
+            cromossomo = new float[10];
+            cromossomo[0] = 25.5498333f;
+            cromossomo[1] = 74.4501648f;
+            cromossomo[2] = 36.30123f;
+            cromossomo[3] = 687.898865f;
+            cromossomo[4] = 55.9507f;
+            cromossomo[5] = 44.0492973f;
+            cromossomo[6] = 30.4719658f;
+            cromossomo[7] = 30.3561325f;
+            cromossomo[8] = 39.1719f;
+            cromossomo[9] = 70.57033f;
+            AG.populacao[4] = new IndividuoAG();
+            AG.populacao[4].descricao = "Individuo 11 da Geração 127 - População 16 (Mutação modificada)";
+            AG.populacao[4].setCromossomo(cromossomo);
+            AG.populacao[4].setGeracao(0);
+
+            // Individuo 0 (11.7000008)
+            cromossomo = new float[10];
+            cromossomo[0] = 27.8090153f;
+            cromossomo[1] = 72.19099f;
+            cromossomo[2] = 36.304966f;
+            cromossomo[3] = 658.7697f;
+            cromossomo[4] = 56.15996f;
+            cromossomo[5] = 43.84004f;
+            cromossomo[6] = 33.8104973f;
+            cromossomo[7] = 33.72156f;
+            cromossomo[8] = 32.4679375f;
+            cromossomo[9] = 70.0304642f;
+            AG.populacao[5] = new IndividuoAG();
+            AG.populacao[5].descricao = "Individuo 0 da Geração 127 - População 16 (Mutação modificada)";
+            AG.populacao[5].setCromossomo(cromossomo);
+            AG.populacao[5].setGeracao(0);
+
+
+        //População 32 => Geração 123
+            // Individuo 18 (19.5000019)
+            cromossomo = new float[10];
+            cromossomo[0] = 56.3948364f;
+            cromossomo[1] = 43.60516f;
+            cromossomo[2] = 36.3893356f;
+            cromossomo[3] = 834.7185f;
+            cromossomo[4] = 51.74155f;
+            cromossomo[5] = 48.25845f;
+            cromossomo[6] = 48.6214371f;
+            cromossomo[7] = 18.1605568f;
+            cromossomo[8] = 33.2180061f;
+            cromossomo[9] = 42.36512f;
+            AG.populacao[6] = new IndividuoAG();
+            AG.populacao[6].descricao = "Individuo 18 da Geração 123 - População 32 (3% mutacao)";
+            AG.populacao[6].setCromossomo(cromossomo);
+            AG.populacao[6].setGeracao(0);
+
+            // Individuo 11 (16.8)
+            cromossomo = new float[10];
+            cromossomo[0] = 56.50211f;
+            cromossomo[1] = 43.4978867f;
+            cromossomo[2] = 36.37354f;
+            cromossomo[3] = 834.7185f;
+            cromossomo[4] = 51.7415352f;
+            cromossomo[5] = 48.2584648f;
+            cromossomo[6] = 48.6214256f;
+            cromossomo[7] = 18.160574f;
+            cromossomo[8] = 33.218f;
+            cromossomo[9] = 42.3651848f;
+            AG.populacao[7] = new IndividuoAG();
+            AG.populacao[7].descricao = "Individuo 11 da Geração 123 - População 32 (3% mutacao)";
+            AG.populacao[7].setCromossomo(cromossomo);
+            AG.populacao[7].setGeracao(0);
+
+
+        //População 32(6 % mutação) => Geração 124
+            // Individuo 0 (20.7000027)
+            cromossomo = new float[10];
+            cromossomo[0] = 32.88713f;
+            cromossomo[1] = 67.11287f;
+            cromossomo[2] = 21.51574f;
+            cromossomo[3] = 519.16925f;
+            cromossomo[4] = 51.5309029f;
+            cromossomo[5] = 48.4690971f;
+            cromossomo[6] = 22.985096f;
+            cromossomo[7] = 37.16888f;
+            cromossomo[8] = 39.8460236f;
+            cromossomo[9] = 52.7137566f;
+            AG.populacao[8] = new IndividuoAG();
+            AG.populacao[8].descricao = "Individuo 0 da Geração 124 - População 32 (6% mutação)";
+            AG.populacao[8].setCromossomo(cromossomo);
+            AG.populacao[8].setGeracao(0);
+
+            // Individuo 4 (17.4)
+            cromossomo = new float[10];
+            cromossomo[0] = 32.88713f;
+            cromossomo[1] = 67.11287f;
+            cromossomo[2] = 20.9839516f;
+            cromossomo[3] = 518.899536f;
+            cromossomo[4] = 51.61385f;
+            cromossomo[5] = 48.38615f;
+            cromossomo[6] = 23.824213f;
+            cromossomo[7] = 38.5611534f;
+            cromossomo[8] = 37.61463f;
+            cromossomo[9] = 52.74516f;
+            AG.populacao[9] = new IndividuoAG();
+            AG.populacao[9].descricao = "Individuo 4 da Geração 124 - População 32 (6% mutação)";
+            AG.populacao[9].setCromossomo(cromossomo);
+            AG.populacao[9].setGeracao(0);
+
+
+        //População 32(Mutação modificada) => Geração 100
+            // Individuo 16 (20.4000015)
+            cromossomo = new float[10];
+            cromossomo[0] = 42.3528328f;
+            cromossomo[1] = 57.6471634f;
+            cromossomo[2] = 27.0611382f;
+            cromossomo[3] = 496.0652f;
+            cromossomo[4] = 55.80641f;
+            cromossomo[5] = 44.1935844f;
+            cromossomo[6] = 41.52936f;
+            cromossomo[7] = 34.8130951f;
+            cromossomo[8] = 23.6575413f;
+            cromossomo[9] = 34.57573f;
+            AG.populacao[10] = new IndividuoAG();
+            AG.populacao[10].descricao = "Individuo 16 da Geração 100 - População 32 (Mutação modificada)";
+            AG.populacao[10].setCromossomo(cromossomo);
+            AG.populacao[10].setGeracao(0);
+
+            // Individuo 17 (17.0999985)
+            cromossomo = new float[10];
+            cromossomo[0] = 42.49127f;
+            cromossomo[1] = 57.508728f;
+            cromossomo[2] = 27.0619335f;
+            cromossomo[3] = 494.0583f;
+            cromossomo[4] = 50.8509979f;
+            cromossomo[5] = 49.1490059f;
+            cromossomo[6] = 41.7180672f;
+            cromossomo[7] = 34.97281f;
+            cromossomo[8] = 23.3091183f;
+            cromossomo[9] = 34.57575f;
+            AG.populacao[11] = new IndividuoAG();
+            AG.populacao[11].descricao = "Individuo 17 da Geração 100 - População 32 (Mutação modificada)";
+            AG.populacao[11].setCromossomo(cromossomo);
+            AG.populacao[11].setGeracao(0);
+
+        // Aleatórios
+            cromossomo = new float[10];
+            cromossomo[0] = 62.0689659f;
+            cromossomo[1] = 37.9310341f;
+            cromossomo[2] = 35f;
+            cromossomo[3] = 784f;
+            cromossomo[4] = 21.2962952f;
+            cromossomo[5] = 78.7037048f;
+            cromossomo[6] = 21.4912281f;
+            cromossomo[7] = 42.5438576f;
+            cromossomo[8] = 35.9649124f;
+            cromossomo[9] = 145f;
+            AG.populacao[12] = new IndividuoAG();
+            AG.populacao[12].descricao = "Individuo Aleatório";
+            AG.populacao[12].setCromossomo(cromossomo);
+            AG.populacao[12].setGeracao(0);
+
+            cromossomo = new float[10];
+            cromossomo[0] = 74.60317f;
+            cromossomo[1] = 25.3968258f;
+            cromossomo[2] = 36f;
+            cromossomo[3] = 171;
+            cromossomo[4] = 90.90909f;
+            cromossomo[5] = 9.090909f;
+            cromossomo[6] = 53.6000023f;
+            cromossomo[7] = 0.8f;
+            cromossomo[8] = 45.6000023f;
+            cromossomo[9] = 150;
+            AG.populacao[13] = new IndividuoAG();
+            AG.populacao[13].descricao = "Individuo Aleatório";
+            AG.populacao[13].setCromossomo(cromossomo);
+            AG.populacao[13].setGeracao(0);
+
+            cromossomo = new float[10];
+            cromossomo[0] = 58.6826324f;
+            cromossomo[1] = 41.3173637f;
+            cromossomo[2] = 29;
+            cromossomo[3] = 297;
+            cromossomo[4] = 75;
+            cromossomo[5] = 25;
+            cromossomo[6] = 17.7083321f;
+            cromossomo[7] = 30.729166f;
+            cromossomo[8] = 51.5624962f;
+            cromossomo[9] = 58;
+            AG.populacao[14] = new IndividuoAG();
+            AG.populacao[14].descricao = "Individuo Aleatório";
+            AG.populacao[14].setCromossomo(cromossomo);
+            AG.populacao[14].setGeracao(0);
+
+            cromossomo = new float[10];
+            cromossomo[0] = 32.3308258f;
+            cromossomo[1] = 67.6691742f;
+            cromossomo[2] = 21;
+            cromossomo[3] = 299;
+            cromossomo[4] = 93.93939f;
+            cromossomo[5] = 6.060606f;
+            cromossomo[6] = 7.69230747f;
+            cromossomo[7] = 92.30769f;
+            cromossomo[8] = 0;
+            cromossomo[9] = 137;
+            AG.populacao[15] = new IndividuoAG();
+            AG.populacao[15].descricao = "Individuo Aleatório";
+            AG.populacao[15].setCromossomo(cromossomo);
+            AG.populacao[15].setGeracao(0);
     }
 
 }

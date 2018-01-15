@@ -11,16 +11,16 @@ public class Property {
 	public string name;
     public Sprite icon;
     public float developTime;
-    public List<Technology> requiredTechnology;
-    public Dictionary<BaseMaterial, int> cost;
-	public Dictionary<Building, int> requiredBuilding;
+    public List<int> requiredTechnology;
+    public Dictionary<int, int> cost;
+	public Dictionary<int, int> requiredBuilding;
     
 	public Property(string name, Sprite icon, float developTime) {
         this.id = Property.getId();
         this.name = name;
         this.icon = icon;
         this.developTime = developTime;
-        this.requiredBuilding = new Dictionary<Building, int> ();
+        this.requiredBuilding = new Dictionary<int, int> ();
 	}
 
 	public static int getId(){

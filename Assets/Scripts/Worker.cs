@@ -10,7 +10,7 @@ public class Worker : Unit {
     public Building returnBuilding;
 
     // CanBuild
-    public List<BuildingDao> buildings;
+    public List<int> buildings;
 
     // Build
     //public Building targetBuilding;
@@ -20,7 +20,7 @@ public class Worker : Unit {
     public BaseMaterial materialType;
     //public MaterialSource targetSource;
 
-    public Worker(string name, Sprite icon, GameObject model, Dictionary<BaseMaterial, int> cost, float attack, float defense, float walkSpeed, float lifeTotal, int capacityTotal, float collectSpeed, List<BuildingDao> buildings, float range, float attackSpeed, float trainingTime, int visionField) : base(name, icon, model, cost, attack, defense, walkSpeed, lifeTotal, range, attackSpeed, trainingTime, visionField) {
+    public Worker(int idType, string name, Sprite icon, GameObject model, Dictionary<int, int> cost, float attack, float defense, float walkSpeed, float lifeTotal, int capacityTotal, float collectSpeed, List<int> buildings, float range, float attackSpeed, float trainingTime, int visionField) : base(idType, name, icon, model, cost, attack, defense, walkSpeed, lifeTotal, range, attackSpeed, trainingTime, visionField) {
 		this.capacity = 0;
 		this.capacityTotal = capacityTotal;
 		this.collectSpeed = collectSpeed;

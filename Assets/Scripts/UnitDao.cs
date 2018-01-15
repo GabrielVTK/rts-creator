@@ -4,11 +4,14 @@ using UnityEngine;
 
 public class UnitDao {
 
+    public static int ID = 0;
+
+    public int id;
 	public string name;
 	public string icon;
 	public string model;
-	public Dictionary<BaseMaterialDao, int> cost;
-	public Dictionary<Building, int> requiredBuilding;
+	public Dictionary<int, int> cost;
+	public Dictionary<int, int> requiredBuilding;
 	public float attack;
 	public float defense;
 	public float walkSpeed;
@@ -21,14 +24,15 @@ public class UnitDao {
 	public float range;
 	public float attackSpeed;
 
-	public UnitDao() {}
+    public UnitDao() {}
 
 	public UnitDao(string name, string icon, string model, float attack, float defense, float walkSpeed, float lifeTotal, float range, float attackSpeed, float trainingTime, int visionField) {
-		this.name = name;
+        this.id = UnitDao.ID++;
+        this.name = name;
 		this.icon = icon;
 		this.model = model;
-		this.cost = new Dictionary<BaseMaterialDao, int>();
-		this.requiredBuilding = new Dictionary<Building, int>();
+		this.cost = new Dictionary<int, int>();
+		this.requiredBuilding = new Dictionary<int, int>();
 		this.attack = attack;
 		this.defense = defense;
 		this.walkSpeed = walkSpeed;
@@ -40,14 +44,7 @@ public class UnitDao {
 	}
 
 	public virtual Unit Instantiate() {
-		
-		Dictionary<BaseMaterial, int> costBaseMaterial = new Dictionary<BaseMaterial, int>();
-
-		foreach(BaseMaterialDao baseMaterialDao in cost.Keys) {
-			costBaseMaterial.Add(baseMaterialDao.Instantiate(), cost[baseMaterialDao]);
-		}
-
-		return new Unit(name, Resources.Load(icon, typeof(Sprite)) as Sprite, Resources.Load(model, typeof(GameObject)) as GameObject, costBaseMaterial, attack, defense, walkSpeed, lifeTotal, range, attackSpeed, trainingTime, visionField);
+		return new Unit(id, name, Resources.Load(icon, typeof(Sprite)) as Sprite, Resources.Load(model, typeof(GameObject)) as GameObject, cost, attack, defense, walkSpeed, lifeTotal, range, attackSpeed, trainingTime, visionField);
 	}
 
 }

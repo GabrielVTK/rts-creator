@@ -40,7 +40,7 @@ public class ProduceMaterialOrder : Order {
 
             if (materialSource.quantity <= 0) {
                     
-                GameController.players[this.building.idPlayer].baseMaterials[this.baseMaterial] += (int)materialSource.quantity;
+                GameController.players[this.building.idPlayer].baseMaterials[this.baseMaterial.idType] += (int)materialSource.quantity;
                 GameController.players[this.building.idPlayer].resourcesCount += (int)materialSource.quantity;
 
                 this.building.Destroy();
@@ -52,7 +52,7 @@ public class ProduceMaterialOrder : Order {
                     
         }
 
-        GameController.players[this.building.idPlayer].baseMaterials[this.baseMaterial] += this.building.producedPerTime;
+        GameController.players[this.building.idPlayer].baseMaterials[this.baseMaterial.idType] += this.building.producedPerTime;
         GameController.players[this.building.idPlayer].resourcesCount += this.building.producedPerTime;
 
         GameController.instance.GetComponent<GameController>().DrawInfoMaterials();

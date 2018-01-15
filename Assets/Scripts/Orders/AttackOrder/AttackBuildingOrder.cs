@@ -91,10 +91,8 @@ public class AttackBuildingOrder : AttackOrder {
         }
 
         if (!this.isActive) {
-            Debug.Log("AttackBuildingOrder desativada");
 
             if (units.Count > 0 && units[0].position != units[0].positionInitial && !this.subOrder) {
-                Debug.Log("Volta para base");
                 //GameController.players[this.idPlayer].standbyOrders.Add(new MovementOrder(this.idPlayer, units, units[0].positionInitial, false, true, false));
             }
 
@@ -116,8 +114,6 @@ public class AttackBuildingOrder : AttackOrder {
 
         if(this.CheckDistance()) {
 
-            Debug.Log("Ataca building!!!");
-
             if(this.movementOrder != null) {
                 foreach (Unit unit in this.units) {
                     unit.isWalking = false;
@@ -128,7 +124,6 @@ public class AttackBuildingOrder : AttackOrder {
             target.isAttacked = true;
 
             if(this.needAlertAttack) {
-                Debug.Log("P" + this.idPlayer + ": unidade " + this.units[0].model.name + " ataca " + this.target.model.name);
                 this.needAlertAttack = false;
                 GameController.players[(this.idPlayer == 0 ? 1 : 0)].enemyAttackOrders.Add(this);
             }
@@ -143,13 +138,10 @@ public class AttackBuildingOrder : AttackOrder {
             }
 
             if (!this.isActive && units.Count > 0 && units[0].position != units[0].positionInitial && !this.subOrder) {
-                Debug.Log("Volta para base depois de finalizar o ataque!");
                 GameController.players[this.idPlayer].standbyOrders.Add(new MovementOrder(this.idPlayer, units, units[0].positionInitial, false, true, false));
             }
 
         } else {
-
-            Debug.Log("Anda ate building!!!");
 
             if (this.movementOrder == null || this.movementOrder.movements.Count == 0) {
                 this.movementOrder = new MovementOrder(this.idPlayer, this.units, this.destiny, true, false, true, true);

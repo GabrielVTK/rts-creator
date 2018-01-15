@@ -25,7 +25,7 @@ public class GameController : MonoBehaviour {
     public static Map map = new Map();
 	public static Player[] players;
 
-    public static bool draw = false;
+    public static bool draw = true;
 
 	public static GameComponents gameComponents;
 
@@ -98,7 +98,8 @@ public class GameController : MonoBehaviour {
         map = gameComponents.map;
         map.Build(gameComponents);
 
-        this.positionBase[0] = new Vector2(14.0f, 6.0f);
+        //this.positionBase[0] = new Vector2(44.0f, 4.0f);
+        this.positionBase[0] = new Vector2(4.0f, 4.0f);
         this.positionBase[1] = new Vector2(map.width - positionBase[0].x - gameComponents.buildings[0].size.x, map.height - positionBase[0].y - gameComponents.buildings[0].size.y);
         
         // Players
@@ -115,6 +116,10 @@ public class GameController : MonoBehaviour {
         players[0].AddBuilding(map, gameComponents.buildings[0], positionBase[0]);
         players[1].AddBuilding(map, gameComponents.buildings[0], positionBase[1]);
         
+        if(players[0].buildings.Count == 0 || players[1].buildings.Count == 0) {
+            throw new System.Exception("Buildings não criadas!!");
+        }
+
         if (GameController.scriptP1 != null && GameController.scriptP2 != null) {
             players[0].scriptAttributes = scriptP1;
             players[1].scriptAttributes = scriptP2;
@@ -479,8 +484,8 @@ public class GameController : MonoBehaviour {
 		    text.GetComponent<Text>().text = "Player " + (this.currentPlayer + 1) + "\n";
 		    text.GetComponent<Text>().text += "     População: " + players[this.currentPlayer].population + " / " + players[this.currentPlayer].populationLimit + "\n";
 
-		    foreach(BaseMaterial baseMaterial in players[this.currentPlayer].baseMaterials.Keys) {
-			    text.GetComponent<Text>().text += "     " + baseMaterial.name + ": " + players[this.currentPlayer].baseMaterials[baseMaterial] + "\n";
+		    foreach(int baseMaterialId in players[this.currentPlayer].baseMaterials.Keys) {
+			    text.GetComponent<Text>().text += "     " + BaseMaterial.GetInstance(baseMaterialId).name + ": " + players[this.currentPlayer].baseMaterials[baseMaterialId] + "\n";
 		    }
 
         }
@@ -852,7 +857,7 @@ public class GameController : MonoBehaviour {
 							    i++;
 						    }
 
-						    UnitDao unit = build.units [element];
+						    UnitDao unit = GameController.gameComponents.units[build.units[element]];
 
 						    GameObject button = new GameObject ("button", typeof(Image));
 						    GameObject icon = GameObject.Instantiate (button);
@@ -899,7 +904,7 @@ public class GameController : MonoBehaviour {
                         
                         int i = 0, j = 0;
 
-					    foreach (BuildingDao building in worker.buildings) {
+					    foreach (int buildingId in worker.buildings) {
 
 						    if (j == componentsPerLine) {
 							    i++;
@@ -916,7 +921,7 @@ public class GameController : MonoBehaviour {
 						    button.GetComponent<RectTransform> ().anchoredPosition3D = new Vector3 (componentMargin + (float)(j * (componentWidth + componentMargin)), -componentMargin - (float)(i * (componentHeight + componentMargin)), 0.0f);
 						    Util.ResetGameObject (button, 0.0f, 1.0f);
 						    button.GetComponent<Image> ().sprite = Resources.Load ("Images/background_icon", typeof(Sprite)) as Sprite;
-						    UnityEngine.Events.UnityAction action = () => { AddBuilding(players[playerId], building); };
+						    UnityEngine.Events.UnityAction action = () => { AddBuilding(players[playerId], GameController.gameComponents.buildings[buildingId]); };
 						    button.GetComponent<Button>().onClick.AddListener(action);
 
 						    icon.transform.SetParent (button.transform);
@@ -924,7 +929,7 @@ public class GameController : MonoBehaviour {
 						    icon.GetComponent<RectTransform> ().sizeDelta = new Vector2 (componentWidth, componentHeight);
 						    icon.GetComponent<RectTransform> ().anchoredPosition3D = new Vector3 (0.0f, 0.0f, 0.0f);
 						    Util.ResetGameObject (icon, 0.0f, 1.0f);
-						    icon.GetComponent<Image> ().sprite = Resources.Load (building.icon, typeof(Sprite)) as Sprite;
+						    icon.GetComponent<Image> ().sprite = Resources.Load(GameController.gameComponents.buildings[buildingId].icon, typeof(Sprite)) as Sprite;
 
 						    j++;
 					    }

@@ -3,14 +3,16 @@ using System.Collections.Generic;
 
 public class IndividuoAG  {
 
+    public string descricao;
     int geracao, qtdVitoria;
     float[] cromossomos;
     float pontuacaoTorneio;
     List<int> oponentes;
     
-    public IndividuoAG() {
-        oponentes = new List<int> { };
-        qtdVitoria = 0;
+    public IndividuoAG(string descricao = "Aleatório") {
+        this.descricao = descricao;
+        this.oponentes = new List<int> { };
+        this.qtdVitoria = 0;
     }
 
     public int getGeracao() {

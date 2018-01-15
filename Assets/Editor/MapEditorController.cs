@@ -7,7 +7,7 @@ using System.IO;
 using GameDevWare.Serialization;
 using System;
 
-public class MapEditorController : MonoBehaviour {
+public class MapEditorController : Editor {
 
     private GameComponents gameComponents;
     private Map map;
@@ -52,14 +52,11 @@ public class MapEditorController : MonoBehaviour {
     // NewMap
     private GameObject PanelNewMap;
 
-    // CameraEditor
-    private Camera cameraEditor;
+    // Map
+    private GameObject components;
 
     void Start () {
-
-        // CameraEditor
-        this.cameraEditor = GameObject.Find("minimap").GetComponent<Camera>();
-
+        
         // Buttons
         this.buttonNew = GameObject.Find("Canvas/Menu/ButtonNew");
         this.buttonLoad = GameObject.Find("Canvas/Menu/ButtonLoad");
@@ -80,6 +77,8 @@ public class MapEditorController : MonoBehaviour {
         this.gameComponents.mapTile = null;
         this.gameComponents.mapComponent = null;
 
+        this.components = GameObject.Find("components"); ;
+
         // ScrollView
         this.tilesView = GameObject.Find("tilesView");
         this.mapComponentsView = GameObject.Find("mapComponentsView");
@@ -96,7 +95,7 @@ public class MapEditorController : MonoBehaviour {
 
         List<string> options = new List<string>();
         
-        foreach(TileDao tile in this.gameComponents.tiles) {
+        foreach(TileDao tile in this.gameComponents.tiles.Values) {
 
             options.Add(tile.name);
 
@@ -157,7 +156,7 @@ public class MapEditorController : MonoBehaviour {
 
         count++;
 
-        foreach (MapComponentDao mapComponent in this.gameComponents.mapComponents) {
+        foreach (MapComponentDao mapComponent in this.gameComponents.mapComponents.Values) {
 
             button = new GameObject();
             button.name = "Button" + mapComponent.name;
@@ -192,104 +191,77 @@ public class MapEditorController : MonoBehaviour {
         this.PanelNewMap.SetActive(false);
 
         this.mapComponentsView.SetActive(false);
-
-        this.LoadMap("map");
 	}
     
     void Update () {
 
-        if(Input.GetKeyDown("tab")) {
+        if (Input.GetAxis("Mouse ScrollWheel") > 0) {
 
-            GameObject components = GameObject.Find("components");
-
-            float scale = components.transform.localScale.x - 0.08f;
-
-            this.kScale++;
-
-            components.transform.localScale = new Vector3(scale, scale, components.transform.localScale.z);
-
-            this.SetPositionCamera();
+            if(this.components.transform.position.z > 100) {
+                this.components.transform.Translate(0.0f, 0.0f, -50.0f);
+            }
 
         }
 
-        if(Input.GetMouseButtonDown(0)) {
+        if (Input.GetAxis("Mouse ScrollWheel") < 0) {
+
+            if (this.components.transform.position.z < 300) {
+                this.components.transform.Translate(0.0f, 0.0f, 50.0f);
+            }
+
+        }
+
+        if (Input.GetMouseButtonDown(0)) {
             this.mouseDown = true;
         }
 
         if(Input.GetMouseButtonUp(0)) {
             this.mouseDown = false;
         }
-                
-        if(this.temp != null) {
+    
+        if (this.temp != null) {
         
             if((this.tile != null || this.mapComponent != null ||
                 (this.tile == null && this.mapComponent == null && this.temp != null)) && 
                 Input.mousePosition.x > 264 && Input.mousePosition.y > 204) {
                 
                 RaycastHit hit;
-                //Ray ray = cameraEditor.ScreenPointToRay(cameraEditor.ViewportToScreenPoint(Input.mousePosition));
-                //Ray ray = new Ray(cameraEditor.transform.position, cameraEditor.transform.forward);
-
-                //Debug.Log("MousePosition: " + Input.mousePosition);
-                //Debug.Log("MousePositionConvert: " + cameraEditor.ViewportToScreenPoint(Input.mousePosition));
-
-                /** TESTE **/
                 Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-                Physics.Raycast(ray, out hit, Mathf.Infinity);
-                Debug.Log(hit.transform);
-                Debug.DrawRay(ray.origin, ray.direction, Color.red);
-
-                Ray ray2 = this.cameraEditor.ViewportPointToRay(hit.textureCoord);
-                Physics.Raycast(ray, out hit, Mathf.Infinity);
-                Debug.Log(hit.transform);
-                Debug.DrawRay(ray.origin, ray.direction, Color.red);
-
-                //if (Physics.Raycast(transform.position, transform.forward, out hit, 10)) { 
+                
                 if (Physics.Raycast(ray, out hit)) {
-                    Debug.Log("Entrou aqui");
-                    ray = this.cameraEditor.ViewportPointToRay(new Vector3(hit.textureCoord.x, hit.textureCoord.y, 0f));
+                    
+                    string objName = hit.transform.name;
+                    string[] coord = objName.Split('_');
 
-                    if (Physics.Raycast(ray, out hit)) { 
-                        Debug.Log(hit.transform.name);
-                        // hit should now contain information about what was hit through secondCamera
-                    }
-                }
-                /** TESTE **/
-
-                if (Physics.Raycast(ray, out hit)) {
-
-                    Debug.Log(hit.transform.name);
+                    GameObject obj = GameObject.Find(objName);
 
                     this.temp.SetActive(true);
-                    this.temp.transform.position = new Vector3(hit.transform.position.x, hit.transform.position.y, this.temp.transform.position.z);
+                    this.temp.transform.position = new Vector3(obj.transform.position.x, obj.transform.position.y, obj.transform.position.z - 0.1f);
                     
                     if(this.mouseDown) {
-
-                        string objName = hit.transform.name;
-                        string[] coord = objName.Split('_');
-
+                        
                         GameObject newComponent = null;
 
                         if (this.tile != null || this.mapComponent != null) {
                             
                             newComponent = GameObject.Instantiate(this.temp);
                             newComponent.GetComponent<BoxCollider>().enabled = false;
-                            newComponent.transform.SetParent(GameObject.Find("components").transform);
-                            newComponent.transform.position = new Vector3(this.temp.transform.position.x, this.temp.transform.position.y, this.temp.transform.position.z + 0.1f);
+                            newComponent.transform.SetParent(this.components.transform);
+                            newComponent.transform.position = new Vector3(obj.transform.position.x, obj.transform.position.y, obj.transform.position.z);
 
                         }
+
+                        int width = ((this.map.directionReflected == 'E' || this.map.directionReflected == 'W') ? this.map.width / 2 : this.map.width);
 
                         if (this.tile != null) {                            
 
                             if(this.tile.isWalkable ||
                                 (!this.tile.isWalkable && GameObject.Find("component_" + coord[1] + "_" + coord[2]) == null)) {
-                                
-                                //Debug.Log("Editando Tile");
+                                                                
                                 GameObject.DestroyImmediate(GameObject.Find(objName));
                                 newComponent.transform.name = objName;
                                 newComponent.GetComponent<BoxCollider>().enabled = true;
-                                this.mapTileData[int.Parse(coord[1]) * this.map.width + int.Parse(coord[2])] = this.gameComponents.tiles.IndexOf(this.tile);
+                                this.mapTileData[int.Parse(coord[1]) * width + int.Parse(coord[2])] = this.tile.id;
                                 
                             } else {
                                 Destroy(newComponent);
@@ -305,7 +277,7 @@ public class MapEditorController : MonoBehaviour {
                                 GameObject.DestroyImmediate(GameObject.Find("component_" + coord[1] + "_" + coord[2]));
                                 newComponent.transform.name = "component_" + coord[1] + "_" + coord[2];
                                 newComponent.transform.position = new Vector3(newComponent.transform.position.x, newComponent.transform.position.y, newComponent.transform.position.z - 0.5f);
-                                this.mapComponentsData[int.Parse(coord[1]) * this.map.width + int.Parse(coord[2])] = this.gameComponents.mapComponents.IndexOf(this.mapComponent) + 1;
+                                this.mapComponentsData[int.Parse(coord[1]) * width + int.Parse(coord[2])] = this.mapComponent.id + 1;
 
                             } else {
                                 Destroy(newComponent);
@@ -315,7 +287,7 @@ public class MapEditorController : MonoBehaviour {
 
                             //Debug.Log("Deleta MapComponent");
                             GameObject.DestroyImmediate(GameObject.Find("component_" + coord[1] + "_" + coord[2]));
-                            this.mapComponentsData[int.Parse(coord[1]) * this.map.width + int.Parse(coord[2])] = 0;
+                            this.mapComponentsData[int.Parse(coord[1]) * width + int.Parse(coord[2])] = 0;
 
                         }
                         
@@ -679,7 +651,7 @@ public class MapEditorController : MonoBehaviour {
                     tileComponent.tag = "MapComponent";
                     tileComponent.GetComponent<BoxCollider>().enabled = false;
                     tileComponent.transform.localScale = new Vector3(scale, scale, 0.1f);
-                    tileComponent.transform.localPosition = new Vector3(xIni + j * (scale + spaceCell), yIni - i * (scale + spaceCell), 89.5f);
+                    tileComponent.transform.localPosition = new Vector3(xIni + j * (scale + spaceCell), yIni - i * (scale + spaceCell), -0.5f);
                 }
 
             }

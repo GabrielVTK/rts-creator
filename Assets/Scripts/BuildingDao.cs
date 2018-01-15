@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class BuildingDao {
-	
-	public string name;
+
+    public static int ID = 0;
+
+    public int id;
+    public string name;
 	public string icon;
 	public string model;
-	public List<UnitDao> units;
-	public List<TechnologyDao> technologies;
-	public Dictionary<BaseMaterialDao, int> cost;
+	public List<int> units;
+	public List<int> technologies;
+	public Dictionary<int, int> cost;
 	public Vector2 size;
 	public float lifeTotal;
 
@@ -26,12 +29,13 @@ public class BuildingDao {
 	public BuildingDao() {}
 
 	public BuildingDao(string name, string icon, string model, Vector2 size, float lifeTotal, float developTime, bool constructed, int visionField, BaseMaterialDao producedMaterial = null, int producedPerTime = 0) {
-		this.name = name;
+        this.id = BuildingDao.ID++;
+        this.name = name;
 		this.icon = icon;
 		this.model = model;
-		this.units = new List<UnitDao>();
-		this.technologies = new List<TechnologyDao>();
-		this.cost = new Dictionary<BaseMaterialDao, int>();
+		this.units = new List<int>();
+		this.technologies = new List<int>();
+		this.cost = new Dictionary<int, int>();
 		this.size = size;
 		this.lifeTotal = lifeTotal;
 		this.developTime = developTime;
@@ -44,19 +48,13 @@ public class BuildingDao {
 
 	public Building Instantiate() {
         
-		Dictionary<BaseMaterial, int> costBaseMaterial = new Dictionary<BaseMaterial, int>();
-
-		foreach(BaseMaterialDao baseMaterialDao in cost.Keys) {
-			costBaseMaterial.Add(baseMaterialDao.Instantiate(), cost[baseMaterialDao]);
-		}
-
 		BaseMaterial producedBaseMaterial = null;
 
 		if (producedMaterial != null) {
 			producedBaseMaterial = producedMaterial.Instantiate();
 		}
 
-		return new Building(name, Resources.Load(icon, typeof(Sprite)) as Sprite, Resources.Load(model, typeof(GameObject)) as GameObject, units, technologies, costBaseMaterial, size, lifeTotal, developTime, constructed, visionField, requireds, producedBaseMaterial, producedPerTime);
+		return new Building(id, name, Resources.Load(icon, typeof(Sprite)) as Sprite, Resources.Load(model, typeof(GameObject)) as GameObject, units, technologies, cost, size, lifeTotal, developTime, constructed, visionField, requireds, producedBaseMaterial, producedPerTime);
 	}
 
 }

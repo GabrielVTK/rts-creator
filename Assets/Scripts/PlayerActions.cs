@@ -37,9 +37,9 @@ public class PlayerActions {
 
 		BuildingDao buildingDao = null;
 
-		foreach(BuildingDao building in workers[0].buildings) {
-			if(building.name == buildingName) {
-				buildingDao = building;
+		foreach(int buildingId in workers[0].buildings) {
+			if(GameController.gameComponents.buildings[buildingId].name == buildingName) {
+				buildingDao = GameController.gameComponents.buildings[buildingId];
 				break;
 			}
 		}
@@ -61,7 +61,7 @@ public class PlayerActions {
 
     public bool CheckCost(string buildingName) {
 
-        foreach(BuildingDao buildingDao in GameController.gameComponents.buildings) {
+        foreach(BuildingDao buildingDao in GameController.gameComponents.buildings.Values) {
             if(buildingDao.name == buildingName) {
                 return player.CheckCosts(buildingDao.cost);
             }
@@ -72,9 +72,9 @@ public class PlayerActions {
 
 	public bool AddUnit(Building building, string unitName) {
         player.unitsCount++;
-		foreach(UnitDao unit in building.units) {
-			if(unit.name == unitName) {
-				return this.player.AddUnit(unit, building);
+		foreach(int unitId in building.units) {
+			if(GameController.gameComponents.units[unitId].name == unitName) {
+				return this.player.AddUnit(GameController.gameComponents.units[unitId], building);
 			}
 		}
 
@@ -174,6 +174,8 @@ public class PlayerActions {
         
         if(building != null) {
 
+            Debug.Log("P"+this.player.id+": Building váilda");
+
             int range = 1, i, j;
 
             while (range < map.height * map.width) {
@@ -185,7 +187,7 @@ public class PlayerActions {
 
                 for (i = lineIni; i <= lineFin; i++) {
 
-                    if (lineIni > 0 && lineFin < (map.height - 1)) {
+                    if (i > 0 && i < (map.height - 1)) {
                         if (columnIni > 0 && !this.player.fog.tiles[i, columnIni].unknown && map.tiles[i, columnIni].canBuild) {
                             return new Vector2(columnIni, i);
                         } else if (columnFin < (map.width - 1) && !this.player.fog.tiles[i, columnFin].unknown && map.tiles[i, columnFin].canBuild) {
@@ -199,7 +201,7 @@ public class PlayerActions {
 
                 for (j = columnIni; j <= columnFin; j++) {
 
-                    if (columnIni > 0 && columnFin < (map.width - 1)) {
+                    if (j > 0 && j < (map.width - 1)) {
                         if (lineIni > 0 && !this.player.fog.tiles[lineIni, j].unknown && map.tiles[lineIni, j].canBuild) {
                             return new Vector2(j, lineIni);
                         } else if (lineFin < (map.height - 1) && !this.player.fog.tiles[lineFin, j].unknown && map.tiles[lineFin, j].canBuild) {
@@ -211,9 +213,11 @@ public class PlayerActions {
                 range++;
             }
 
+        } else {
+            Debug.Log("P" + this.player.id + ": Building nula");
         }
 
-        Debug.Log("(-1.0f, -1.0f)");
+        Debug.Log("P"+this.player.id+ ": GetNearTile(-1.0f, -1.0f)");
 		return new Vector2(-1.0f, -1.0f);
 	}
 
@@ -255,17 +259,63 @@ public class PlayerActions {
 
 		return false;
 	}
-    
+
     public List<Unit> GetUnits(string name) {
         List<Unit> units = new List<Unit>();
 
         foreach (Unit unit in player.units.Values) {
-            if(unit.name == name) {
+            if (unit.name == name) {
                 units.Add(unit);
             }
         }
 
         return units;
+    }
+
+    public List<Worker> GetWorkers() {
+
+        Debug.Log("GetWorkers()");
+
+        List<Worker> workers = new List<Worker>();
+
+        int idWorker = -1;
+
+        foreach(UnitDao unit in GameController.gameComponents.units.Values) {
+            if(unit.GetType() == typeof(WorkerDao)) {
+                idWorker = unit.id;
+                break;
+            }
+        }
+
+        Debug.Log("IdWorker => " + idWorker);
+
+        if(idWorker != -1) {
+            foreach (Unit unit in player.units.Values) {
+                if (unit.idType == idWorker) {
+                    workers.Add((Worker)unit);
+                }
+            }
+        }
+
+        Debug.Log("Workers => " + workers.Count);
+
+        return workers;
+    }
+
+    public List<Worker> GetWorkersAvailable() {
+
+        List<Worker> workers = GetWorkers();
+        List<Worker> workersAvailable = new List<Worker>();
+        
+        if (workers.Count > 0) {
+            foreach (Worker worker in workers) {
+                if (!worker.isWalking && !worker.isBusy) {
+                    workersAvailable.Add(worker);
+                }
+            }
+        }
+
+        return workersAvailable;
     }
 
     public List<Unit> GetTroop() {

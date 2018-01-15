@@ -304,7 +304,6 @@ public class Pathfinding {
                 }
 
                 if(this.rangeConsidered && range > this.unitCurrent.range) {
-                    Debug.Log("Range considerado!");
                     break;
                 }
 

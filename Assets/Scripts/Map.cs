@@ -30,7 +30,6 @@ public class Map {
 		this.height = (directionReflected == 'N' || directionReflected == 'S') ? 2*height : height;
 		this.isReflected = true;
 		this.directionReflected = directionReflected;
-
     }
 
 	public int GetTileSize() {

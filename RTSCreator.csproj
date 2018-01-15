@@ -81,6 +81,7 @@
     <Compile Include="Assets\AG\AG.cs" />
     <Compile Include="Assets\AG\IndividuoAG.cs" />
     <Compile Include="Assets\AG\TorneioTabela.cs" />
+    <Compile Include="Assets\AG\TorneioTabelaLiga.cs" />
     <Compile Include="Assets\Includes\Warrior Pack Bundle 2 FREE\Code\IKHands.cs" />
     <Compile Include="Assets\Includes\Warrior Pack Bundle 2 FREE\Code\SmoothFollow.cs" />
     <Compile Include="Assets\Includes\Warrior Pack Bundle 2 FREE\Code\WarriorAnimationDemoFREE.cs" />

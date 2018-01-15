@@ -18,7 +18,7 @@ public class Script {
 
     private List<Building> myBase;
     private Building buildingHelp;
-    private List<Unit> workersAvailable;
+    private List<Worker> workersAvailable;
 
     private Unit enemyWorker;
     
@@ -37,7 +37,7 @@ public class Script {
     public void Main() {
         
         this.myBase = player.action.GetBuilding("Base");
-        this.workersAvailable = player.action.GetUnitAvailable("Worker");
+        this.workersAvailable = player.action.GetWorkersAvailable();
 
         this.buildingHelp = null;
         
@@ -87,10 +87,10 @@ public class Script {
                     units.Add(troop[i]);
                 }
                 
-            } else if(player.action.GetAmountUnit("Worker") > 0) {
+            } else if(player.action.GetAmountUnit("Trabalhador") > 0) {
                 this.ShowMessage("Defende com trabalhadores!");
 
-                List<Unit> workers = player.action.GetUnits("Worker");
+                List<Worker> workers = player.action.GetWorkers();
 
                 for (int i = 0; i < workers.Count / 2; i++) {
                     units.Add(workers[i]);
@@ -178,12 +178,13 @@ public class Script {
                 this.ShowMessage("Sem trabalhadores ociosos!");
 
                 //Qtd. Trabalhadores < Parâmetro 3?
-                if (player.action.GetAmountUnit("Worker") < player.scriptAttributes.GetAttribute("WORKERS") && this.myBase.Count > 0) {
-                    player.action.AddUnit(this.myBase[0], "Worker");
+                if (player.action.GetAmountUnit("Trabalhador") < player.scriptAttributes.GetAttribute("WORKERS") && this.myBase.Count > 0) {
+                    this.ShowMessage("Cria trabalhador");
+                    player.action.AddUnit(this.myBase[0], "Trabalhador");
                 } else {
-                    this.ShowMessage("Não é possível criar trabalhadores ("+ player.action.GetAmountUnit("Worker") + "). Aguarde...");
+                    this.ShowMessage("Não é possível criar trabalhadores ("+ player.action.GetAmountUnit("Trabalhador") + "). Aguarde...");
 
-                    if(player.action.GetAmountUnit("Worker") == 0) {
+                    if(player.action.GetAmountUnit("Trabalhador") == 0) {
                         this.Suicide();
                     }
 
@@ -241,10 +242,10 @@ public class Script {
 
             this.ShowMessage("Pouca tropa!");
             
-            if (player.action.GetAmountUnit("Infantry") < (player.scriptAttributes.GetAttribute("INFANTRY") * player.scriptAttributes.GetAttribute("TROOP"))) {
+            if (player.action.GetAmountUnit("Infantry") < (player.scriptAttributes.GetAttribute("INFANTRY") * player.scriptAttributes.GetAttribute("TROOP") / 100)) {
                 // Cria infantaria
                 player.action.AddUnit(player.action.GetBuilding("Quarter")[0], "Infantry");
-            } else if (player.action.GetAmountUnit("Archer") < (player.scriptAttributes.GetAttribute("ARCHER") * player.scriptAttributes.GetAttribute("TROOP"))) {
+            } else if (player.action.GetAmountUnit("Archer") < (player.scriptAttributes.GetAttribute("ARCHER") * player.scriptAttributes.GetAttribute("TROOP") / 100)) {
                 // Cria arqueiro
                 player.action.AddUnit(player.action.GetBuilding("Quarter")[0], "Archer");
             } else {
@@ -290,7 +291,7 @@ public class Script {
 
             this.ShowMessage("Procura trabalhadores e buildings!");
 
-            List<Unit> enemyWorkers = player.action.GetVisibleEnemyUnits("Worker");
+            List<Unit> enemyWorkers = player.action.GetVisibleEnemyUnits("Trabalhador");
             List<Building> enemyBuildings = player.action.GetVisibleEnemyBuildings();
 
             if(enemyWorkers.Count > 0) {
@@ -325,7 +326,7 @@ public class Script {
         if (this.workersAvailable.Count > 0) {
             player.action.ExploreMap(this.workersAvailable[0]);
         } else if (this.myBase.Count > 0) {
-            player.action.AddUnit(this.myBase[0], "Worker");
+            player.action.AddUnit(this.myBase[0], "Trabalhador");
         } else if (player.action.GetTroop().Count > 0) {
             player.action.ExploreMap(player.action.GetTroop()[0]);
         } else if (player.action.VerifyBuildingExists("Quarter")) {

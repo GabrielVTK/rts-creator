@@ -4,10 +4,12 @@ using UnityEngine;
 
 public class Building : Property {
 
-	public GameObject model;
+    public int idType;
+
+    public GameObject model;
 	public int level;
-	public List<UnitDao> units;
-	public List<TechnologyDao> technologies;
+	public List<int> units;
+	public List<int> technologies;
 	public Vector2 position;
 	public Vector2 creationPoint;
 	public float lifeTotal;
@@ -24,10 +26,11 @@ public class Building : Property {
 	public bool constructed;
 
 	public bool isAttacked;
-
+    
     public TrainUnitOrder trainUnitOrder;
 
-	public Building(string name, Sprite icon, GameObject model, List<UnitDao> units, List<TechnologyDao> technologies, Dictionary<BaseMaterial, int> cost, Vector2 size, float lifeTotal, float developTime, bool constructed, int visionField, List<string> requireds, BaseMaterial producedMaterial, int producedPerTime) : base(name, icon, developTime) {
+	public Building(int idType,  string name, Sprite icon, GameObject model, List<int> units, List<int> technologies, Dictionary<int, int> cost, Vector2 size, float lifeTotal, float developTime, bool constructed, int visionField, List<string> requireds, BaseMaterial producedMaterial, int producedPerTime) : base(name, icon, developTime) {
+        this.idType = idType;
         this.model = model;
 		this.level = 1;
 		this.units = units;
@@ -36,21 +39,13 @@ public class Building : Property {
 		this.size = size;
 		this.lifeTotal = lifeTotal;
 		this.life = 1.0f;
-		//this.timeCounter = 0.0f;
 		this.constructed = constructed;
-		//this.trainingUnits = new List<Unit>();
 		this.visionField = visionField;
 		this.requireds = requireds;
 		this.producedMaterial = producedMaterial;
 		this.producedPerTime = producedPerTime;
 		this.isAttacked = false;
         this.trainUnitOrder = null;
-
-
-		foreach(UnitDao unit in this.units) {
-			unit.requiredBuilding.Add(this, 1);
-		}
-
 	}
 
 	public void DevelopTechnology(Technology technology) {

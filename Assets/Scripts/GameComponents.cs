@@ -8,26 +8,21 @@ public class GameComponents {
 	public int[,] mapTile;
 	public int[,] mapComponent;
 
-	public List<BaseMaterialDao> baseMaterials;
-	public List<TileDao> tiles;
-	public List<UnitDao> units;
-	public List<BuildingDao> buildings;
-	public List<MapComponentDao> mapComponents;
+	public Dictionary<int, BaseMaterialDao> baseMaterials;
+	public Dictionary<int, TileDao> tiles;
+	public Dictionary<int, UnitDao> units;
+	public Dictionary<int, BuildingDao> buildings;
+	public Dictionary<int, MapComponentDao> mapComponents;
 
 	public GameComponents() {
 
-		this.tiles = new List<TileDao>();
-		this.baseMaterials = new List<BaseMaterialDao>();
-		this.units = new List<UnitDao>();
-		this.buildings = new List<BuildingDao>();
-		this.mapComponents = new List<MapComponentDao>();
-
-		this.map = new Map(100, 50, 'N');
-		this.mapTile = new int[map.height, map.width];
-		this.mapComponent = new int[map.height, map.width];
-
-
-		CreateGame();
+		this.tiles = new Dictionary<int, TileDao>();
+		this.baseMaterials = new Dictionary<int, BaseMaterialDao>();
+		this.units = new Dictionary<int, UnitDao>();
+		this.buildings = new Dictionary<int, BuildingDao>();
+		this.mapComponents = new Dictionary<int, MapComponentDao>();
+                
+		//CreateGame();
 		LoadGame();
 	}
 
@@ -52,94 +47,95 @@ public class GameComponents {
 		BuildingDao build_base = new BuildingDao("Base", "Images/build_Base", "build_Base", new Vector2(2.0f, 2.0f), 3000.0f, 0.0f, true, 3);
 
 		BuildingDao build_quarter = new BuildingDao("Quarter", "Images/build_Quarter", "build_Quarter", new Vector2 (1.0f, 1.0f), 1200.0f, 50.0f, false, 1);
-		build_quarter.cost.Add(baseMaterialGold, 200);
+		build_quarter.cost.Add(baseMaterialGold.id, 200);
 
 		BuildingDao build_farm = new BuildingDao("Farm", "Images/material_Meat", "build_Farm", new Vector2(1.0f, 1.0f), 500.0f, 30.0f, false, 1, baseMaterialMeat, 1);
-		build_farm.cost.Add(baseMaterialGold, 75);
+		build_farm.cost.Add(baseMaterialGold.id, 75);
 
 		BuildingDao build_mine = new BuildingDao("Mine", "Images/build_Mine", "build_Mine", new Vector2(1.0f, 1.0f), 500.0f, 30.0f, false, 1, baseMaterialGold, 1);
-		build_mine.cost.Add(baseMaterialMeat, 100);
+		build_mine.cost.Add(baseMaterialMeat.id, 100);
 		build_mine.requireds.Add(mats_Gold.name);
 
 		// Warrior Unit
 		CombatDao infantry_unit = new CombatDao("Infantry", "Images/unit_Warrior", "unit_Warrior", 3.0f, 0.0f, 1.0f, 50.0f, 1.0f, 1.0f, new CombatType(), 22.0f, 2);
-		infantry_unit.cost.Add(baseMaterialMeat, 35);
-		infantry_unit.cost.Add(baseMaterialGold, 25);
+		infantry_unit.cost.Add(baseMaterialMeat.id, 35);
+		infantry_unit.cost.Add(baseMaterialGold.id, 25);
 
 		// Archer Unit
 		CombatDao archer_unit = new CombatDao("Archer", "Images/unit_Archer", "unit_Archer", 4.0f, 0.0f, 0.9f, 30.0f, 4.0f, 1.0f, new CombatType(), 30.0f, 2);
-		archer_unit.cost.Add(baseMaterialMeat, 25);
-		archer_unit.cost.Add(baseMaterialGold, 45);
+		archer_unit.cost.Add(baseMaterialMeat.id, 25);
+		archer_unit.cost.Add(baseMaterialGold.id, 45);
 
 		// Archer Unit
 		CombatDao cavalry_unit = new CombatDao("Cavalry", "Images/unit_Knight", "unit_Knight", 10.0f, 0.0f, 1.5f, 100.0f, 1.0f, 1.0f, new CombatType(), 35.0f, 2);
-		cavalry_unit.cost.Add(baseMaterialMeat, 60);
-		cavalry_unit.cost.Add(baseMaterialGold, 75);
+		cavalry_unit.cost.Add(baseMaterialMeat.id, 60);
+		cavalry_unit.cost.Add(baseMaterialGold.id, 75);
 
 		// Worker Unit
 		WorkerDao unit_worker = new WorkerDao("Worker", "Images/unit_Worker", "unit_Worker", 1.0f, 0.0f, 1.0f, 45.0f, 5, 1.0f, 1.0f, 1.0f, 10.0f, 2);
-		unit_worker.cost.Add(baseMaterialMeat, 10);
-		unit_worker.buildingsName.Add(build_quarter.name);
-		unit_worker.buildingsName.Add(build_farm.name);
-		unit_worker.buildingsName.Add(build_mine.name);
+		unit_worker.cost.Add(baseMaterialMeat.id, 10);
+
+		unit_worker.buildings.Add(build_quarter.id);
+		unit_worker.buildings.Add(build_farm.id);
+		unit_worker.buildings.Add(build_mine.id);
 
 
 		// Add in tiles list
-		tiles.Add(tile_Grass);
-		tiles.Add(tile_Water);
-		tiles.Add(tile_Bridge);
+		tiles.Add(tile_Grass.id, tile_Grass);
+		tiles.Add(tile_Water.id, tile_Water);
+		tiles.Add(tile_Bridge.id, tile_Bridge);
 
 		// Add in baseMaterial list
-		baseMaterials.Add(baseMaterialGold);
-		baseMaterials.Add(baseMaterialMeat);
+		baseMaterials.Add(baseMaterialGold.id, baseMaterialGold);
+		baseMaterials.Add(baseMaterialMeat.id, baseMaterialMeat);
 
 		// Add in materialSource list
-		mapComponents.Add(mats_Gold);
-		mapComponents.Add(mc_Tree);
+		mapComponents.Add(mats_Gold.id, mats_Gold);
+		mapComponents.Add(mc_Tree.id, mc_Tree);
 
 		// Add in buildings list
-		buildings.Add(build_base);
-		buildings.Add(build_quarter);
-		buildings.Add(build_farm);
-		buildings.Add(build_mine);
+		buildings.Add(build_base.id, build_base);
+		buildings.Add(build_quarter.id, build_quarter);
+		buildings.Add(build_farm.id, build_farm);
+		buildings.Add(build_mine.id, build_mine);
 
 		// Add in unit list
-		units.Add(infantry_unit);
-		units.Add(archer_unit);
-		units.Add(cavalry_unit);
-		units.Add(unit_worker);
-
+		units.Add(infantry_unit.id, infantry_unit);
+		units.Add(archer_unit.id, archer_unit);
+		units.Add(cavalry_unit.id, cavalry_unit);
+		units.Add(unit_worker.id, unit_worker);
+        
 		// Add in unit list of build_base
-		build_base.units.Add(unit_worker);
-		build_quarter.units.Add(infantry_unit);
-		build_quarter.units.Add(archer_unit);
-		build_quarter.units.Add(cavalry_unit);
+		build_base.units.Add(unit_worker.id);
+		build_quarter.units.Add(infantry_unit.id);
+		build_quarter.units.Add(archer_unit.id);
+		build_quarter.units.Add(cavalry_unit.id);
         
 		SaveGame();
 	}
 
 	public void SaveGame() {
-		GameData gameData = new GameData ();
-
+		GameData gameData = new GameData();
+        
 		// Tiles
-		gameData.tiles = Json.SerializeToString<List<TileDao>> (tiles);
+		gameData.tiles = Json.SerializeToString<Dictionary<int, TileDao>> (tiles);
+        
+        // Base Materials
+        gameData.baseMaterials = Json.SerializeToString<Dictionary<int, BaseMaterialDao>> (baseMaterials);
 
-		// Base Materials
-		gameData.baseMaterials = Json.SerializeToString<List<BaseMaterialDao>> (baseMaterials);
-
-		// Material Sources
-		gameData.mapComponents = Json.SerializeToString<List<MapComponentDao>>(mapComponents);
-
-		// Units
-		gameData.units = Json.SerializeToString<List<UnitDao>> (units);
-
-		// Buildings
-		gameData.buildings = Json.SerializeToString<List<BuildingDao>> (buildings);
-
-		GameData.Save(gameData);
+        // Material Sources
+        gameData.mapComponents = Json.SerializeToString<Dictionary<int, MapComponentDao>>(mapComponents);
+        
+        // Units
+        gameData.units = Json.SerializeToString<Dictionary<int, UnitDao>> (units);
+        
+        // Buildings
+        gameData.buildings = Json.SerializeToString<Dictionary<int, BuildingDao>>(buildings);
+        
+        GameData.Save(gameData);
 	}
-
-	public void LoadGame() {
+    
+    public void LoadGame() {
 		GameData gameData = GameData.Load();
 		GameDataMap gameDataMap = GameDataMap.Load("map");
 
@@ -150,31 +146,38 @@ public class GameComponents {
         this.units.Clear();
 
         // Tiles
-        this.tiles = Json.Deserialize<List<TileDao>>(gameData.tiles);
+        this.tiles = Json.Deserialize<Dictionary<int, TileDao>>(gameData.tiles);
 
         // Base Materials
-        this.baseMaterials = Json.Deserialize<List<BaseMaterialDao>>(gameData.baseMaterials);
+        this.baseMaterials = Json.Deserialize<Dictionary<int, BaseMaterialDao>>(gameData.baseMaterials);
 
-		foreach(BaseMaterialDao baseMaterial in baseMaterials) {
+		foreach(BaseMaterialDao baseMaterial in baseMaterials.Values) {
 			baseMaterial.Instantiate();
 		}
 
         // Material Sources
-        this.mapComponents = Json.Deserialize<List<MapComponentDao>>(gameData.mapComponents);
+        this.mapComponents = Json.Deserialize<Dictionary<int, MapComponentDao>>(gameData.mapComponents);
 
         // Units
-        this.units = Json.Deserialize<List<UnitDao>>(gameData.units);
+        this.units = Json.Deserialize<Dictionary<int, UnitDao>>(gameData.units);
+
+        foreach(UnitDao unit in this.units.Values) {
+            Debug.Log(unit.name + " => " + unit.id);
+        }
 
         // Buildings
-        this.buildings = Json.Deserialize<List<BuildingDao>>(gameData.buildings);
+        this.buildings = Json.Deserialize<Dictionary<int, BuildingDao>>(gameData.buildings);
 
 		// Map
 		//map = Json.Deserialize<Map>(gameData.map);
 		this.map = JsonUtility.FromJson<Map>(gameDataMap.map);
 
-		// Map Tiles
-		//mapTile = Json.Deserialize<int[,]>(gameData.mapTile);
-		int[] tilesList = Json.Deserialize<int[]>(gameDataMap.mapTile);
+        this.mapTile = new int[map.height, map.width];
+        this.mapComponent = new int[map.height, map.width];
+
+        // Map Tiles
+        //mapTile = Json.Deserialize<int[,]>(gameData.mapTile);
+        int[] tilesList = Json.Deserialize<int[]>(gameDataMap.mapTile);
 
 		//Map Components
 		//mapComponent = Json.Deserialize<int[,]>(gameData.mapComponent);
@@ -193,4 +196,5 @@ public class GameComponents {
 		}
 
 	}
+
 }

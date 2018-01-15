@@ -11,7 +11,7 @@ public class Player {
 	public int populationLimit;
     public Dictionary<int, Building> buildings;
 	public Dictionary<int, Unit> units;
-	public Dictionary<BaseMaterial, int> baseMaterials;
+	public Dictionary<int, int> baseMaterials;
     
     public Fog fog;
 
@@ -47,7 +47,7 @@ public class Player {
 		this.population = 0;
 		this.populationLimit = populationLimit;
         
-		this.baseMaterials = new Dictionary<BaseMaterial, int>();
+		this.baseMaterials = new Dictionary<int, int>();
 		this.units = new Dictionary<int, Unit>();
 		this.buildings = new Dictionary<int, Building> ();
 
@@ -62,17 +62,23 @@ public class Player {
 
     public void AddBaseMaterial(string baseMaterialName, int quantity) {
 
-        BaseMaterial baseMaterial = BaseMaterial.GetInstance(baseMaterialName);
+        BaseMaterial baseMaterial = null;
+
+        foreach (BaseMaterialDao baseMaterialDao in GameController.gameComponents.baseMaterials.Values) {
+            if(baseMaterialDao.name == baseMaterialName) {
+                baseMaterial = BaseMaterial.GetInstance(baseMaterialDao.id);
+            }
+        }
 
         if(baseMaterial != null) {
-            this.baseMaterials.Add(baseMaterial, quantity);
+            this.baseMaterials.Add(baseMaterial.idType, quantity);
         }        
 
     }
 
 	public bool AddUnit(UnitDao unit, Building building) {
-
-		if(building.constructed && this.CheckCosts(unit.cost) && unit.requiredBuilding.ContainsKey(building) && this.population < this.populationLimit) {
+        
+		if(building.constructed && this.CheckCosts(unit.cost) && this.population < this.populationLimit) {
 
             this.population++;
 			this.DiscountCosts(unit.cost);
@@ -232,11 +238,11 @@ public class Player {
 
 	}
 
-	public bool CheckCosts(Dictionary<BaseMaterialDao, int> cost) {
+	public bool CheckCosts(Dictionary<int, int> cost) {
 
-		foreach(BaseMaterialDao baseMaterial in cost.Keys) {
+		foreach(int baseMaterialId in cost.Keys) {
 
-			if(this.baseMaterials[baseMaterial.Instantiate()] < cost[baseMaterial]) {
+			if(this.baseMaterials[baseMaterialId] < cost[baseMaterialId]) {
 				return false;
 			}
 		}
@@ -244,20 +250,12 @@ public class Player {
 		return true;
 	}
 
-	public void DiscountCosts(Dictionary<BaseMaterialDao, int> cost) {
+	public void DiscountCosts(Dictionary<int, int> cost) {
 		
-		foreach(BaseMaterialDao baseMaterial in cost.Keys) {
-			this.baseMaterials[baseMaterial.Instantiate()] -= cost[baseMaterial];
+		foreach(int baseMaterialId in cost.Keys) {
+			this.baseMaterials[baseMaterialId] -= cost[baseMaterialId];
 		}
 
 	}
-
-    public bool valoresAbsurdos(string baseMaterialName) {
-
-        BaseMaterial mat = BaseMaterial.GetInstance(baseMaterialName);
-                     
-        return this.baseMaterials[mat] >= 10000;
-                
-    }
-
+    
 }

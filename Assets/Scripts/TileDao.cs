@@ -4,7 +4,10 @@ using UnityEngine;
 
 public class TileDao {
 
-	public string name;
+    public static int ID = 0;
+
+    public int id;
+    public string name;
 	public string model;
 	public bool isWalkable;
 	public bool canBuild;
@@ -13,7 +16,8 @@ public class TileDao {
 	public TileDao() {}
 
 	public TileDao(string name, string model, bool isWalkable, bool canBuild, float terraineType) {
-		this.name = name;
+        this.id = TileDao.ID++;
+        this.name = name;
 		this.model = model;
 		this.isWalkable = isWalkable;
 		this.canBuild = canBuild;

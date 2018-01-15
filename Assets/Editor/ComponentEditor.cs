@@ -73,7 +73,7 @@ public class ComponentEditor : Editor {
     private GameObject modalNewUnit;
 
     void Start() {
-
+        
         this.gc = new GameComponents();
         
         this.tiles = GameObject.Find("Canvas/Panel/tilesView");
